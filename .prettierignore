@@ -1,0 +1,12 @@
+# Build output
+dist/
+
+# Generated files
+.astro/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Documentation (optional - remove if you want to format README)
+README.mds
