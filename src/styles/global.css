@@ -1,9 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind 4 Import */
+@import 'tailwindcss';
 
+/* Optional: Custom Theme Configuration */
+@theme {
+  /* Customize Tailwind's design tokens here if needed */
+  /* Example: Custom colors, fonts, spacing, etc. */
+
+  /* Uncomment and modify as needed:
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-600: #059669;
+  --color-emerald-900: #064e3b;
+  
+  --font-sans: "Paper Mono", system-ui, -apple-system, sans-serif;
+  */
+}
+
+/* Global Styles */
 @layer base {
-  /* system font stack for better performance  */
+  /* System font stack for better performance */
   body {
     font-family:
       system-ui,
@@ -15,38 +29,43 @@
       Arial,
       sans-serif;
   }
+
+  /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
+
+  /* Better focus styles for accessibility */
   :focus-visible {
-    outline: 2px solid theme('colors.emerald.500');
+    outline: 2px solid oklch(0.6 0.19 164); /* emerald-500 equivalent */
     outline-offset: 2px;
   }
 }
 
 @layer components {
-  /* custom scrollbar for webkit browsers */
+  /* Custom scrollbar for webkit browsers */
   .sidebar-panel::-webkit-scrollbar {
     width: 8px;
   }
+
   .sidebar-panel::-webkit-scrollbar-track {
     background: transparent;
   }
 
   .sidebar-panel::-webkit-scrollbar-thumb {
-    background: theme('colors.zinc.300');
+    background: oklch(0.85 0 0); /* zinc-300 equivalent */
     border-radius: 4px;
   }
 
   .dark .sidebar-panel::-webkit-scrollbar-thumb {
-    background: theme('colors.zinc.700');
+    background: oklch(0.35 0 0); /* zinc-700 equivalent */
   }
 
   .sidebar-panel::-webkit-scrollbar-thumb:hover {
-    background: theme('colors.zinc.400');
+    background: oklch(0.75 0 0); /* zinc-400 equivalent */
   }
 
   .dark .sidebar-panel::-webkit-scrollbar-thumb:hover {
-    background: theme('colors.zinc.600');
+    background: oklch(0.45 0 0); /* zinc-600 equivalent */
   }
 }
