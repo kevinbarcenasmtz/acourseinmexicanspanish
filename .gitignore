@@ -24,6 +24,3 @@ pnpm-debug.log*
 .idea/
 
 .vscode/
-
-# font
-src/fonts/
