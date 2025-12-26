@@ -14,7 +14,7 @@ const lessons = defineCollection({
           ipa: z.string().optional(),
           english: z.string().optional(),
           notes: z.string().optional(),
-        }) 
+        }),
       )
       .optional(),
     grammarTopics: z.array(z.string()).optional(),

@@ -1,0 +1,74 @@
+---
+/**
+ * Header.astro
+ *
+ * Global site header with:
+ * - Mobile menu toggle (hamburger) for left sidebar
+ * - Logo/Brand with site title
+ * - Mobile ToC toggle for right sidebar
+ * - Dark mode toggle (future: Phase 4)
+ *
+ * Responsive behavior:
+ * - Desktop (≥1024px): No hamburger/ToC buttons (sidebars visible)
+ * - Tablet/Mobile (<1024px): Hamburger (left) + ToC button (right)
+ */
+
+interface Props {
+  siteTitle?: string;
+}
+
+const { siteTitle = 'A Course in Mexican Spanish' } = Astro.props;
+---
+
+<header class="app-header">
+  <div class="flex h-full items-center justify-between px-4">
+    <!-- Mobile Menu Toggle (Left) -->
+    <button
+      type="button"
+      id="mobile-menu-toggle"
+      class="lg:hidden theme-toggle"
+      aria-label="Open navigation menu"
+      aria-expanded="false"
+      aria-controls="left-drawer"
+    >
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+
+    <!-- Logo/Brand -->
+    <a href="/" class="flex items-center gap-3 text-primary no-underline">
+      <span
+        class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-white font-display text-lg"
+      >
+        MX
+      </span>
+      <span class="font-display text-lg hidden sm:inline">
+        {siteTitle}
+      </span>
+      <span class="font-display text-lg sm:hidden"> Mexican Spanish </span>
+    </a>
+
+    <!-- Mobile ToC Toggle (Right) -->
+    <button
+      type="button"
+      id="mobile-toc-toggle"
+      class="lg:hidden theme-toggle"
+      aria-label="Open table of contents"
+      aria-expanded="false"
+      aria-controls="right-drawer"
+    >
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 10h16M4 14h10M4 18h7"></path>
+      </svg>
+    </button>
+  </div>
+</header>

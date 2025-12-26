@@ -30,7 +30,7 @@ const lessonsBySection = lessons.reduce(
     acc[lesson.section].push(lesson);
     return acc;
   },
-  {} as Record<string, typeof lessons>
+  {} as Record<string, typeof lessons>,
 );
 ---
 
@@ -137,7 +137,7 @@ const lessonsBySection = lessons.reduce(
                             ))}
                           </div>
                         </div>
-                      )
+                      ),
                     )
                   }
                 </nav>

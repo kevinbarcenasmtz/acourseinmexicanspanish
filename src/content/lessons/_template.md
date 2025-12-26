@@ -1,20 +1,20 @@
 ---
-title: "Your Lesson Title" # Required
-section: "Basics" # Options: Basics, Everyday Life, Past Tenses, Advanced (required)
+title: 'Your Lesson Title' # Required
+section: 'Basics' # Options: Basics, Everyday Life, Past Tenses, Advanced (required)
 order: 2 # Sequential number (required)
-description: "Brief description of what students will learn in this lesson" # (required)
+description: 'Brief description of what students will learn in this lesson' # (required)
 vocabulary: # optional
-  - spanish: "palabra"
-    ipa: "/paˈla.βɾa/"
-    english: "word"
-    notes: "Optional additional context or usage notes"
-  - spanish: "hola"
-    ipa: "/ˈo.la/"
-    english: "hello"
+  - spanish: 'palabra'
+    ipa: '/paˈla.βɾa/'
+    english: 'word'
+    notes: 'Optional additional context or usage notes'
+  - spanish: 'hola'
+    ipa: '/ˈo.la/'
+    english: 'hello'
 grammarTopics: # optional
-  - "Topic 1"
-  - "Topic 2"
-  - "Topic 3"
+  - 'Topic 1'
+  - 'Topic 2'
+  - 'Topic 3'
 ---
 
 ## Lesson [Number] ([Spanish number])
@@ -38,6 +38,7 @@ grammarTopics: # optional
 Explanation of the grammar concept.
 
 **Examples:**
+
 - Example 1
 - Example 2
 
@@ -69,6 +70,7 @@ Continue as needed...
 Explanation of cultural context relevant to this lesson.
 
 Key points:
+
 - Point 1
 - Point 2
 - Point 3
@@ -121,10 +123,12 @@ Practice these phrases aloud:
 ### F. Additional Vocabulary
 
 **Category 1:**
+
 - **word** = translation
 - **word** = translation
 
 **Category 2:**
+
 - **word** = translation
 - **word** = translation
 
