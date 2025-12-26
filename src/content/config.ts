@@ -4,7 +4,7 @@ const lessons = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-    section: z.enum(['Basics', 'Everyday Life', 'Past Tenses', 'Advanced']),
+    section: z.enum(['Foundation', 'Intermediate', 'Advanced']),
     order: z.number(),
     description: z.string(),
     vocabulary: z
