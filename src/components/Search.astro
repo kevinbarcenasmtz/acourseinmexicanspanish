@@ -1,0 +1,95 @@
+---
+/**
+ * Search.astro
+ *
+ * Reusable search input component with:
+ * - Search icon
+ * - Keyboard shortcut hint (/)
+ * - Focus styling
+ * - Accessible label
+ */
+
+ interface Props {
+  /** Input element ID */
+  id: string;
+  /** Placeholder text */
+  placeholder?: string;
+  /** Accessible label */
+  ariaLabel?: string;
+  /** Show keyboard shortcut hint */
+  showHint?: boolean;
+}
+
+const {
+  id,
+  placeholder = 'Search...',
+  ariaLabel = 'Search',
+  showHint = true,
+} = Astro.props;
+---
+
+<div class="search-container">
+  <svg
+    class="search-icon"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    />
+  </svg>
+  <input
+    type="text"
+    id={id}
+    placeholder={showHint ? `${placeholder} (/)` : placeholder}
+    class="search-input"
+    aria-label={ariaLabel}
+    autocomplete="off"
+  />
+  {showHint && (
+    <kbd class="search-hint" aria-hidden="true">/</kbd>
+  )}
+</div>
+
+<style>
+  .search-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+  }
+
+  .search-hint {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0.125rem 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    background-color: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 0.25rem;
+    pointer-events: none;
+  }
+
+  .search-input:focus ~ .search-hint,
+  .search-input:not(:placeholder-shown) ~ .search-hint {
+    opacity: 0;
+  }
+</style>

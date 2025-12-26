@@ -122,7 +122,7 @@ const currentPath = Astro.url.pathname;
           aria-label="Table of contents"
         >
           <slot name="right-sidebar">
-            <!-- Default: Empty, populated by page -->
+            <RightSideBar headings={tocHeadings} />
           </slot>
         </aside>
       </div>

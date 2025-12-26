@@ -327,12 +327,22 @@
     font-size: var(--text-small);
     color: var(--color-text-secondary);
     border-left: 2px solid transparent;
+    text-decoration: none;
+    line-height: 1.4;
     transition:
       color var(--transition-fast),
-      border-color var(--transition-fast);
+      border-color var(--transition-fast),
+      background-color var(--transition-fast);
   }
 
   .toc-item:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-tertiary);
+  }
+
+  .toc-item:focus-visible {
+    outline: none;
+    background-color: var(--color-bg-tertiary);
     color: var(--color-text-primary);
   }
 
@@ -340,17 +350,34 @@
     color: var(--color-accent);
     font-weight: 600;
     border-left-color: var(--color-accent);
+    background-color: var(--color-accent-bg);
   }
 
   /* ToC depth indentation */
+  .toc-item[data-depth='1'] {
+    padding-left: 0.75rem;
+    font-weight: 600;
+  }
+
   .toc-item[data-depth='2'] {
-    padding-left: 1.25rem;
+    padding-left: 1rem;
   }
+
   .toc-item[data-depth='3'] {
-    padding-left: 1.75rem;
+    padding-left: 1.5rem;
   }
+
   .toc-item[data-depth='4'] {
-    padding-left: 2.25rem;
+    padding-left: 2rem;
+    font-size: calc(var(--text-small) * 0.95);
+  }
+
+  /* Active state overrides depth font-weight */
+  .toc-item.active[data-depth='1'],
+  .toc-item.active[data-depth='2'],
+  .toc-item.active[data-depth='3'],
+  .toc-item.active[data-depth='4'] {
+    font-weight: 600;
   }
 
   /* --------------------------------------------
@@ -416,6 +443,14 @@
   .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure headings have proper scroll offset for ToC navigation */
+  .prose h1[id],
+  .prose h2[id],
+  .prose h3[id],
+  .prose h4[id] {
+    scroll-margin-top: calc(var(--header-height) + 20px);
   }
 
   /* --------------------------------------------

@@ -1,0 +1,32 @@
+---
+/**
+ * TocItem.astro
+ *
+ * Individual Table of Contents item with:
+ * - Depth-based indentation (h1=1, h2=2, h3=3, h4=4)
+ * - Active state styling via CSS class
+ * - Accessible link with proper attributes
+ */
+
+ interface Props {
+  /** The anchor href (e.g., "#section-id") */
+  href: string;
+  /** Display text for the ToC item */
+  text: string;
+  /** Heading depth (1-4) for indentation */
+  depth: 1 | 2 | 3 | 4;
+  /** Whether this item is currently active */
+  isActive?: boolean;
+}
+
+const { href, text, depth, isActive = false } = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={['toc-item', { active: isActive }]}
+  data-depth={depth}
+  data-toc-link
+>
+  {text}
+</a>

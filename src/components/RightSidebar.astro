@@ -1,0 +1,254 @@
+---
+/**
+ * RightSidebar.astro
+ *
+ * Table of Contents sidebar with:
+ * - Heading hierarchy display (h1-h4)
+ * - Scroll-spy active indicator (JS-enhanced)
+ * - Depth-based indentation
+ * - Smooth scroll navigation
+ */
+
+ import TocItem from './TocItem.astro';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings?: Heading[];
+  title?: string;
+}
+
+const { headings = [], title = 'On this page' } = Astro.props;
+
+// Filter to only include h1-h4 headings
+const filteredHeadings = headings.filter(
+  (h) => h.depth >= 1 && h.depth <= 4
+);
+
+const hasHeadings = filteredHeadings.length > 0;
+---
+
+{hasHeadings && (
+  <nav class="toc" aria-label="Table of contents">
+    <h2 class="toc-header">{title}</h2>
+
+    <ul class="toc-list" role="list">
+      {filteredHeadings.map((heading) => (
+        <li>
+          <TocItem
+            href={`#${heading.slug}`}
+            text={heading.text}
+            depth={heading.depth as 1 | 2 | 3 | 4}
+          />
+        </li>
+      ))}
+    </ul>
+
+    <div class="toc-indicator" aria-hidden="true"></div>
+  </nav>
+)}
+
+{!hasHeadings && (
+  <nav class="toc toc-empty" aria-label="Table of contents">
+    <p class="toc-empty-message">No sections on this page</p>
+  </nav>
+)}
+
+<script>
+  function initScrollSpy() {
+    const tocLinks = document.querySelectorAll('[data-toc-link]');
+    const tocIndicator = document.querySelector('.toc-indicator') as HTMLElement;
+
+    if (tocLinks.length === 0) return;
+
+    // Get heading IDs from ToC links
+    const headingIds = Array.from(tocLinks).map((link) => {
+      const href = link.getAttribute('href');
+      return href ? href.slice(1) : '';
+    }).filter(Boolean);
+
+    // Get corresponding heading elements
+    const headingElements = headingIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (headingElements.length === 0) return;
+
+    let activeHeadingId: string | null = null;
+
+    function setActiveHeading(id: string | null) {
+      if (id === activeHeadingId) return;
+      activeHeadingId = id;
+
+      tocLinks.forEach((link) => {
+        const href = link.getAttribute('href');
+        const isActive = href === `#${id}`;
+        link.classList.toggle('active', isActive);
+
+        if (isActive && tocIndicator) {
+          const linkRect = link.getBoundingClientRect();
+          const tocRect = link.closest('.toc')?.getBoundingClientRect();
+
+          if (tocRect) {
+            const top = linkRect.top - tocRect.top;
+            tocIndicator.style.transform = `translateY(${top}px)`;
+            tocIndicator.style.opacity = '1';
+            tocIndicator.style.height = `${linkRect.height}px`;
+          }
+        }
+      });
+
+      if (!id && tocIndicator) {
+        tocIndicator.style.opacity = '0';
+      }
+    }
+
+    const observerOptions: IntersectionObserverInit = {
+      rootMargin: '-80px 0px -60% 0px',
+      threshold: [0, 1],
+    };
+
+    const visibleHeadings = new Map<string, IntersectionObserverEntry>();
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const id = entry.target.id;
+        if (entry.isIntersecting) {
+          visibleHeadings.set(id, entry);
+        } else {
+          visibleHeadings.delete(id);
+        }
+      });
+
+      if (visibleHeadings.size > 0) {
+        const sortedVisible = Array.from(visibleHeadings.entries())
+          .sort(([, a], [, b]) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const [topId] = sortedVisible[0];
+        setActiveHeading(topId);
+      } else {
+        const scrollTop = window.scrollY;
+        let lastAbove: string | null = null;
+
+        for (const heading of headingElements) {
+          const rect = heading.getBoundingClientRect();
+          const absoluteTop = rect.top + scrollTop;
+          if (absoluteTop < scrollTop + 100) {
+            lastAbove = heading.id;
+          }
+        }
+        setActiveHeading(lastAbove);
+      }
+    }, observerOptions);
+
+    headingElements.forEach((heading) => observer.observe(heading));
+
+    // Smooth scroll on click
+    tocLinks.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        if (!href) return;
+
+        const targetId = href.slice(1);
+        const targetElement = document.getElementById(targetId);
+
+        if (targetElement) {
+          e.preventDefault();
+          history.pushState(null, '', href);
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setActiveHeading(targetId);
+        }
+      });
+    });
+
+    // Initial active state
+    requestAnimationFrame(() => {
+      const scrollTop = window.scrollY;
+      if (scrollTop < 100 && headingElements[0]) {
+        setActiveHeading(headingElements[0].id);
+        return;
+      }
+
+      let closest: HTMLElement | null = null;
+      let closestDistance = Infinity;
+
+      for (const heading of headingElements) {
+        const rect = heading.getBoundingClientRect();
+        const distance = Math.abs(rect.top - 80);
+        if (distance < closestDistance) {
+          closest = heading;
+          closestDistance = distance;
+        }
+      }
+
+      if (closest) setActiveHeading(closest.id);
+    });
+
+    // Cleanup on Astro navigation
+    document.addEventListener('astro:before-swap', () => observer.disconnect());
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollSpy);
+  } else {
+    initScrollSpy();
+  }
+
+  document.addEventListener('astro:after-swap', initScrollSpy);
+</script>
+
+<style>
+  .toc {
+    position: relative;
+  }
+
+  .toc-header {
+    font-size: var(--text-small);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 0.75rem;
+    padding: 0 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc-list li {
+    margin: 0;
+  }
+
+  .toc-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 1.5rem;
+    background-color: var(--color-accent);
+    opacity: 0;
+    transition:
+      transform 0.15s ease-out,
+      opacity 0.15s ease-out,
+      height 0.15s ease-out;
+    pointer-events: none;
+    border-radius: 1px;
+  }
+
+  .toc-empty {
+    padding: 1rem 0.75rem;
+  }
+
+  .toc-empty-message {
+    font-size: var(--text-small);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+    margin: 0;
+  }
+</style>
