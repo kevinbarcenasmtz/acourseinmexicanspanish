@@ -1,0 +1,438 @@
+---
+/**
+ * BaseLayout.astro
+ * 
+ * The foundational layout providing:
+ * - HTML document shell with meta tags
+ * - Font preloading for performance
+ * - 3-column CSS Grid (left sidebar | content | right sidebar)
+ * - Responsive breakpoints (mobile/tablet/desktop)
+ * - Dark mode support with localStorage persistence
+ * - Mobile drawer overlay infrastructure
+ * - Skip link for accessibility
+ * 
+ * Usage:
+ * ```astro
+ * <BaseLayout title="Page Title">
+ *   <Fragment slot="left-sidebar">...</Fragment>
+ *   <Fragment slot="right-sidebar">...</Fragment>
+ *   <main>Content here</main>
+ * </BaseLayout>
+ * ```
+ */
+
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { 
+  title, 
+  description = 'A comprehensive Mexican Spanish learning resource for English speakers' 
+} = Astro.props;
+
+const siteTitle = 'A Course in Mexican Spanish';
+const fullTitle = title === siteTitle ? title : `${title} | ${siteTitle}`;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    
+    <title>{fullTitle}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- Font Preloading -->
+    <link 
+      rel="preload" 
+      href="/fonts/chilanga-regular.ttf" 
+      as="font" 
+      type="font/ttf" 
+      crossorigin 
+    />
+    <link 
+      rel="preload" 
+      href="/fonts/atkinson-regular.woff2" 
+      as="font" 
+      type="font/woff2" 
+      crossorigin 
+    />
+    
+    <!-- Dark Mode: Prevent flash of wrong theme -->
+    <script is:inline>
+      (function() {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  
+  <body class="bg-primary text-primary min-h-screen antialiased">
+    <!-- Skip Link (Accessibility) -->
+    <a href="#main-content" class="skip-link">
+      Skip to main content
+    </a>
+    
+    <!-- App Shell -->
+    <div class="app-shell">
+      <!-- Header Slot -->
+      <header class="app-header">
+        <slot name="header">
+          <!-- Default header placeholder - replace with Header component -->
+          <div class="flex h-full items-center justify-between px-4">
+            <div class="flex items-center gap-3">
+              <!-- Mobile menu button (hidden on desktop) -->
+              <button 
+                type="button"
+                id="mobile-menu-toggle"
+                class="lg:hidden theme-toggle"
+                aria-label="Open navigation menu"
+                aria-expanded="false"
+                aria-controls="left-drawer"
+              >
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              
+              <!-- Logo/Brand -->
+              <a href="/" class="flex items-center gap-3 text-primary no-underline">
+                <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-white font-display text-lg">
+                  MX
+                </span>
+                <span class="font-display text-lg hidden sm:inline">
+                  A Course in Mexican Spanish
+                </span>
+                <span class="font-display text-lg sm:hidden">
+                  Mexican Spanish
+                </span>
+              </a>
+            </div>
+            
+            <!-- Mobile ToC button (hidden on desktop) -->
+            <button 
+              type="button"
+              id="mobile-toc-toggle"
+              class="lg:hidden theme-toggle"
+              aria-label="Open table of contents"
+              aria-expanded="false"
+              aria-controls="right-drawer"
+            >
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h7" />
+              </svg>
+            </button>
+          </div>
+        </slot>
+      </header>
+      
+      <!-- Main Layout Grid -->
+      <div class="app-body">
+        <!-- Left Sidebar (Navigation) -->
+        <aside 
+          id="left-sidebar"
+          class="app-sidebar-left custom-scrollbar"
+          aria-label="Site navigation"
+        >
+          <slot name="left-sidebar">
+            <!-- Default: Empty, populated by page -->
+          </slot>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main id="main-content" class="app-content custom-scrollbar">
+          <div class="content-wrapper">
+            <slot />
+          </div>
+        </main>
+        
+        <!-- Right Sidebar (Table of Contents) -->
+        <aside 
+          id="right-sidebar"
+          class="app-sidebar-right custom-scrollbar"
+          aria-label="Table of contents"
+        >
+          <slot name="right-sidebar">
+            <!-- Default: Empty, populated by page -->
+          </slot>
+        </aside>
+      </div>
+    </div>
+    
+    <!-- Mobile Drawer Overlay -->
+    <div 
+      id="drawer-overlay" 
+      class="drawer-overlay"
+      aria-hidden="true"
+    ></div>
+    
+    <!-- Mobile Left Drawer -->
+    <div 
+      id="left-drawer" 
+      class="drawer drawer-left custom-scrollbar"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Navigation menu"
+    >
+      <div class="flex items-center justify-between p-4 border-b border-border">
+        <span class="font-display text-lg">Navigation</span>
+        <button 
+          type="button"
+          class="theme-toggle"
+          aria-label="Close navigation menu"
+          data-close-drawer="left"
+        >
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-4">
+        <slot name="mobile-nav">
+          <!-- Populated with same content as left-sidebar -->
+        </slot>
+      </div>
+    </div>
+    
+    <!-- Mobile Right Drawer (ToC) -->
+    <div 
+      id="right-drawer" 
+      class="drawer drawer-right custom-scrollbar"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Table of contents"
+    >
+      <div class="flex items-center justify-between p-4 border-b border-border">
+        <span class="font-display text-lg">On this page</span>
+        <button 
+          type="button"
+          class="theme-toggle"
+          aria-label="Close table of contents"
+          data-close-drawer="right"
+        >
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-4">
+        <slot name="mobile-toc">
+          <!-- Populated with same content as right-sidebar -->
+        </slot>
+      </div>
+    </div>
+    
+    <!-- Mobile Drawer Script -->
+    <script>
+      const overlay = document.getElementById('drawer-overlay');
+      const leftDrawer = document.getElementById('left-drawer');
+      const rightDrawer = document.getElementById('right-drawer');
+      const menuToggle = document.getElementById('mobile-menu-toggle');
+      const tocToggle = document.getElementById('mobile-toc-toggle');
+      
+      function openDrawer(drawer: HTMLElement | null, toggle: HTMLElement | null) {
+        if (!drawer || !overlay) return;
+        
+        drawer.classList.add('open');
+        overlay.classList.add('visible');
+        document.body.classList.add('body-scroll-lock');
+        toggle?.setAttribute('aria-expanded', 'true');
+        
+        // Focus first focusable element
+        const focusable = drawer.querySelector('button, a, input');
+        (focusable as HTMLElement)?.focus();
+      }
+      
+      function closeDrawer(drawer: HTMLElement | null, toggle: HTMLElement | null) {
+        if (!drawer || !overlay) return;
+        
+        drawer.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.classList.remove('body-scroll-lock');
+        toggle?.setAttribute('aria-expanded', 'false');
+        toggle?.focus();
+      }
+      
+      function closeAllDrawers() {
+        closeDrawer(leftDrawer, menuToggle);
+        closeDrawer(rightDrawer, tocToggle);
+      }
+      
+      // Toggle buttons
+      menuToggle?.addEventListener('click', () => {
+        const isOpen = leftDrawer?.classList.contains('open');
+        if (isOpen) {
+          closeDrawer(leftDrawer, menuToggle);
+        } else {
+          closeAllDrawers();
+          openDrawer(leftDrawer, menuToggle);
+        }
+      });
+      
+      tocToggle?.addEventListener('click', () => {
+        const isOpen = rightDrawer?.classList.contains('open');
+        if (isOpen) {
+          closeDrawer(rightDrawer, tocToggle);
+        } else {
+          closeAllDrawers();
+          openDrawer(rightDrawer, tocToggle);
+        }
+      });
+      
+      // Close buttons inside drawers
+      document.querySelectorAll('[data-close-drawer]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const side = (btn as HTMLElement).dataset.closeDrawer;
+          if (side === 'left') closeDrawer(leftDrawer, menuToggle);
+          if (side === 'right') closeDrawer(rightDrawer, tocToggle);
+        });
+      });
+      
+      // Overlay click closes
+      overlay?.addEventListener('click', closeAllDrawers);
+      
+      // Escape key closes
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAllDrawers();
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  /* ==========================================================================
+     App Shell Layout
+     ========================================================================== */
+  
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* --------------------------------------------
+     Header
+     -------------------------------------------- */
+  .app-header {
+    flex-shrink: 0;
+    height: var(--header-height-mobile);
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg-primary);
+    z-index: var(--z-header);
+  }
+  
+  @media (min-width: 1024px) {
+    .app-header {
+      height: var(--header-height);
+    }
+  }
+  
+  /* --------------------------------------------
+     Main Body Grid
+     -------------------------------------------- */
+  .app-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas: "content";
+    min-height: 0; /* Allow flex child to shrink */
+    overflow: hidden;
+  }
+  
+  /* Tablet: Left sidebar collapsible, no right sidebar in grid */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .app-body {
+      grid-template-columns: auto 1fr;
+      grid-template-areas: "left content";
+    }
+  }
+  
+  /* Desktop: Full 3-column layout */
+  @media (min-width: 1024px) {
+    .app-body {
+      grid-template-columns: var(--sidebar-width-default) 1fr var(--toc-width);
+      grid-template-areas: "left content right";
+    }
+  }
+  
+  /* --------------------------------------------
+     Left Sidebar
+     -------------------------------------------- */
+  .app-sidebar-left {
+    grid-area: left;
+    display: none;
+    overflow-y: auto;
+    background-color: var(--color-bg-secondary);
+    border-right: 1px solid var(--color-border);
+  }
+  
+  @media (min-width: 640px) {
+    .app-sidebar-left {
+      display: block;
+      width: var(--sidebar-width-default);
+      min-width: var(--sidebar-width-min);
+      max-width: var(--sidebar-width-max);
+    }
+  }
+  
+  /* --------------------------------------------
+     Main Content
+     -------------------------------------------- */
+  .app-content {
+    grid-area: content;
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    .app-content {
+      padding: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .app-content {
+      padding: 2.5rem 3rem;
+    }
+  }
+  
+  .content-wrapper {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+  }
+  
+  /* --------------------------------------------
+     Right Sidebar (ToC)
+     -------------------------------------------- */
+  .app-sidebar-right {
+    grid-area: right;
+    display: none;
+    overflow-y: auto;
+    padding: 1.5rem 1rem;
+    border-left: 1px solid var(--color-border);
+    background-color: var(--color-bg-primary);
+  }
+  
+  @media (min-width: 1024px) {
+    .app-sidebar-right {
+      display: block;
+      position: sticky;
+      top: 0;
+      height: calc(100vh - var(--header-height));
+    }
+  }
+</style>

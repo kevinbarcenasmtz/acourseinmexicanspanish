@@ -1,6 +1,6 @@
 ---
 title: "At María's House"
-section: "Basics"
+section: "Foundation"
 order: 1
 description: "Basic greetings, family introductions, and common household phrases in Mexican Spanish"
 vocabulary:
