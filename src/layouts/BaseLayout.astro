@@ -21,7 +21,7 @@
  * - header: Header override (defaults to Header component)
  */
 
-import '../styles/global.css';
+ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import LeftSidebar from '../components/LeftSidebar.astro';
 
@@ -104,23 +104,6 @@ const currentPath = Astro.url.pathname;
           aria-label="Site navigation"
         >
           <slot name="left-sidebar">
-            <!-- #region agent log -->
-            <script is:inline>
-              fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  location: 'BaseLayout.astro:107',
-                  message: 'Desktop sidebar LeftSidebar slot rendering',
-                  data: { slot: 'left-sidebar', sidebarId: 'left-sidebar' },
-                  timestamp: Date.now(),
-                  sessionId: 'debug-session',
-                  runId: 'run1',
-                  hypothesisId: 'A'
-                })
-              }).catch(() => {});
-            </script>
-            <!-- #endregion -->
             <LeftSidebar currentPath={currentPath} context="desktop" />
           </slot>
         </aside>
@@ -175,23 +158,6 @@ const currentPath = Astro.url.pathname;
       </div>
       <div class="drawer-body">
         <slot name="mobile-nav">
-          <!-- #region agent log -->
-          <script is:inline>
-            fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                location: 'BaseLayout.astro:161',
-                message: 'Mobile drawer LeftSidebar slot rendering',
-                data: { slot: 'mobile-nav', drawerId: 'left-drawer' },
-                timestamp: Date.now(),
-                sessionId: 'debug-session',
-                runId: 'run1',
-                hypothesisId: 'E'
-              })
-            }).catch(() => {});
-          </script>
-          <!-- #endregion -->
           <LeftSidebar currentPath={currentPath} context="mobile" />
         </slot>
       </div>
