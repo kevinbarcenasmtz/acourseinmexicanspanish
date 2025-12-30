@@ -1,14 +1,15 @@
 /**
  * Collapsible Sections
  * 
- * Handles expand/collapse functionality for navigation sections
+ * Handles expand/collapse functionality for navigation sections.
+ * Note: Initial state is applied by inline script to prevent flash.
+ * This module only handles click interactions.
  */
 
 import { getCollapsedSections, addCollapsedSection, removeCollapsedSection } from './storage';
 
 export function initCollapsibleSections(): void {
   const sections = document.querySelectorAll('.nav-section');
-  const collapsedSections = getCollapsedSections();
 
   sections.forEach((section) => {
     const button = section.querySelector('.nav-section-header') as HTMLButtonElement;
@@ -17,16 +18,13 @@ export function initCollapsibleSections(): void {
 
     if (!button || !content || !sectionId) return;
 
-    // Restore collapsed state from localStorage
-    if (collapsedSections.includes(sectionId)) {
-      content.classList.remove('expanded');
-      section.classList.remove('expanded');
-      button.setAttribute('aria-expanded', 'false');
-    } else {
-      section.classList.add('expanded');
-    }
+    // Remove any existing click listeners (for re-initialization on navigation)
+    const newButton = button.cloneNode(true) as HTMLButtonElement;
+    button.parentNode?.replaceChild(newButton, button);
 
-    button.addEventListener('click', () => toggleSection(section, button, content, sectionId));
+    newButton.addEventListener('click', () => {
+      toggleSection(section, newButton, content, sectionId);
+    });
   });
 }
 
@@ -36,15 +34,13 @@ function toggleSection(
   content: HTMLElement,
   sectionId: string,
 ): void {
-  const isExpanded = content.classList.contains('expanded');
+  const isExpanded = section.classList.contains('expanded');
 
   if (isExpanded) {
-    content.classList.remove('expanded');
     section.classList.remove('expanded');
     button.setAttribute('aria-expanded', 'false');
     addCollapsedSection(sectionId);
   } else {
-    content.classList.add('expanded');
     section.classList.add('expanded');
     button.setAttribute('aria-expanded', 'true');
     removeCollapsedSection(sectionId);
@@ -56,11 +52,12 @@ export function collapseCurrentSection(element: HTMLElement): void {
   if (!section) return;
 
   const button = section.querySelector('.nav-section-header') as HTMLButtonElement;
-  const content = section.querySelector('.nav-section-content') as HTMLElement;
   const sectionId = section.getAttribute('data-section');
 
-  if (button && content && sectionId && content.classList.contains('expanded')) {
-    toggleSection(section, button, content, sectionId);
+  if (button && sectionId && section.classList.contains('expanded')) {
+    section.classList.remove('expanded');
+    button.setAttribute('aria-expanded', 'false');
+    addCollapsedSection(sectionId);
   }
 }
 
@@ -69,11 +66,11 @@ export function expandCurrentSection(element: HTMLElement): void {
   if (!section) return;
 
   const button = section.querySelector('.nav-section-header') as HTMLButtonElement;
-  const content = section.querySelector('.nav-section-content') as HTMLElement;
   const sectionId = section.getAttribute('data-section');
 
-  if (button && content && sectionId && !content.classList.contains('expanded')) {
-    toggleSection(section, button, content, sectionId);
+  if (button && sectionId && !section.classList.contains('expanded')) {
+    section.classList.add('expanded');
+    button.setAttribute('aria-expanded', 'true');
+    removeCollapsedSection(sectionId);
   }
 }
-

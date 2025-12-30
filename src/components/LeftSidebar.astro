@@ -165,83 +165,50 @@ const lessonsBySection = allLessons
   </div>
 </div>
 
+<script is:inline>
+  // Run immediately to prevent flash - before CSS paints
+  (function() {
+    const STORAGE_KEY = 'sidebar-collapsed-sections';
+    
+    function getCollapsedSections() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    }
+    
+    const collapsedSections = getCollapsedSections();
+    
+    // Expand all sections NOT in the collapsed list
+    document.querySelectorAll('.nav-section').forEach((section) => {
+      const sectionId = section.getAttribute('data-section');
+      if (sectionId && !collapsedSections.includes(sectionId)) {
+        section.classList.add('expanded');
+        const button = section.querySelector('.nav-section-header');
+        if (button) button.setAttribute('aria-expanded', 'true');
+      }
+    });
+    
+    // Also expand section containing current page
+    const activeItem = document.querySelector('.nav-item.active');
+    if (activeItem) {
+      const section = activeItem.closest('.nav-section');
+      if (section) {
+        section.classList.add('expanded');
+        const button = section.querySelector('.nav-section-header');
+        if (button) button.setAttribute('aria-expanded', 'true');
+      }
+    }
+  })();
+</script>
+
 <script>
   import { initSidebar } from '../lib/sidebar/index';
 
-  // #region agent log
-  function logDuplicateIDCheck() {
-    const searchInputs = document.querySelectorAll('[id^="sidebar-search-"]');
-    const count = searchInputs.length;
-    const locations = Array.from(searchInputs).map((el) => {
-      const inputEl = el;
-      const parent = inputEl.closest('aside, .drawer, .sidebar-container');
-      const isVisible = 'offsetParent' in inputEl ? inputEl.offsetParent !== null : false;
-      return {
-        id: inputEl.id,
-        parentId: parent?.id || parent?.className || 'unknown',
-        isVisible: isVisible,
-        context: inputEl.getAttribute('data-sidebar-context') || 'unknown',
-        location: parent?.closest('#left-sidebar') ? 'desktop-sidebar' : 
-                 parent?.closest('#left-drawer') ? 'mobile-drawer' : 'unknown'
-      };
-    });
-    
-    fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        location: 'LeftSidebar.astro:168',
-        message: 'Post-fix: ID check - sidebar-search inputs found',
-        data: { count, locations, allIds: Array.from(searchInputs).map(el => el.id) },
-        timestamp: Date.now(),
-        sessionId: 'debug-session',
-        runId: 'post-fix',
-        hypothesisId: 'A'
-      })
-    }).catch(() => {});
-    
-    if (count > 1) {
-      const duplicateIds = Array.from(searchInputs).map(el => el.id);
-      const hasDuplicates = new Set(duplicateIds).size !== duplicateIds.length;
-      if (hasDuplicates) {
-        fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'LeftSidebar.astro:168',
-            message: 'DUPLICATE ID STILL DETECTED',
-            data: { duplicateCount: count, locations, duplicateIds },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'post-fix',
-            hypothesisId: 'A'
-          })
-        }).catch(() => {});
-      } else {
-        fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'LeftSidebar.astro:168',
-            message: 'FIX VERIFIED: All IDs are unique',
-            data: { count, locations, allIds: duplicateIds },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'post-fix',
-            hypothesisId: 'A'
-          })
-        }).catch(() => {});
-      }
-    }
-  }
-  // #endregion
-
   // Wait for DOM to be fully loaded
   document.addEventListener('DOMContentLoaded', () => {
-    // #region agent log
-    logDuplicateIDCheck();
-    // #endregion
-    
     // Find all sidebar containers and initialize each one's search
     const containers = document.querySelectorAll('[data-sidebar-context]');
     containers.forEach((container) => {
@@ -256,10 +223,6 @@ const lessonsBySection = allLessons
 
   // Re-initialize on Astro navigation
   document.addEventListener('astro:after-swap', () => {
-    // #region agent log
-    logDuplicateIDCheck();
-    // #endregion
-    
     // Find all sidebar search inputs and initialize each one
     const searchInputs = document.querySelectorAll('[id^="sidebar-search-"]');
     searchInputs.forEach((input) => {
@@ -286,76 +249,7 @@ const lessonsBySection = allLessons
   .sidebar-nav {
     flex: 1;
     overflow-y: auto;
-  }
-
-  /* Navigation Section */
-  .nav-section {
-    margin-bottom: 0.75rem;
-  }
-
-  /* Section Header */
-  .nav-section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0.625rem 0.75rem;
-    background: transparent;
-    border: none;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: background-color var(--transition-fast);
-  }
-
-  .nav-section-header:hover {
-    background-color: var(--color-bg-tertiary);
-  }
-
-  /* Expanded section header has accent background */
-  .nav-section.expanded .nav-section-header {
-    background-color: var(--color-accent-bg);
-  }
-
-  /* Chevron Icon (▶/▼) */
-  .nav-section-icon {
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1;
-    color: var(--color-text-secondary);
-    display: inline-block;
-    transition: transform 0.2s ease-out;
-    transform: rotate(0deg);
-  }
-
-  /* Collapsed: chevron points right (▶) */
-  .nav-section:not(.expanded) .nav-section-icon::before {
-    content: '▶';
-  }
-
-  /* Expanded: chevron points down (▼) - rotated 90° */
-  .nav-section.expanded .nav-section-icon {
-    transform: rotate(90deg);
-  }
-
-  .nav-section.expanded .nav-section-icon::before {
-    content: '▶';
-  }
-
-  /* Vertical bar for expanded sections */
-  .nav-section-items {
-    padding-top: 0.25rem;
-    padding-left: 0.75rem;
-    border-left: 8px solid var(--color-border);
-    margin-left: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  /* Remove focus ring, use background tint instead */
-  .nav-item:focus-visible {
-    outline: none;
-    background-color: var(--color-bg-tertiary);
+    padding-bottom: 1rem;
   }
 
   /* Resize Handle */
@@ -363,16 +257,20 @@ const lessonsBySection = allLessons
     width: 4px;
     cursor: col-resize;
     background: transparent;
-    transition: background-color var(--transition-fast);
+    transition: background-color 0.15s ease;
     flex-shrink: 0;
   }
 
   .resize-handle:hover {
+    background-color: var(--color-border);
+  }
+
+  .resize-handle:active {
     background-color: var(--color-accent);
   }
 
   /* Search Highlighting */
-  .search-highlight {
+  :global(.search-highlight) {
     background-color: var(--color-accent-bg);
     color: var(--color-accent);
     font-weight: 600;
