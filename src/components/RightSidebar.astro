@@ -4,9 +4,14 @@
  *
  * Table of Contents sidebar with:
  * - Heading hierarchy display (h1-h4)
- * - Scroll-spy active indicator (JS-enhanced)
+ * - Scroll-spy active indicator (JS-enhanced with IntersectionObserver)
  * - Depth-based indentation
  * - Smooth scroll navigation
+ *
+ * Note: The spec mentions CSS-only scroll-spy using :target-current and anchor()
+ * positioning, but these features have limited browser support. This implementation
+ * uses JavaScript with IntersectionObserver for reliable cross-browser compatibility.
+ * The JS approach provides the same visual result with better browser coverage.
  */
 
 import TocItem from './TocItem.astro';
@@ -61,13 +66,155 @@ const hasHeadings = filteredHeadings.length > 0;
 }
 
 <script>
+  // Debug mode - set to true to enable console logging
+  const DEBUG = true; // Change to true to enable debugging
+
+  function log(...args: unknown[]) {
+    if (DEBUG) {
+      console.log('[ToC Scroll-Spy]', ...args);
+    }
+  }
+
+  function warn(...args: unknown[]) {
+    if (DEBUG) {
+      console.warn('[ToC Scroll-Spy]', ...args);
+    }
+  }
+
+  // Check for CSS feature support
+  function supportsModernCSS(): boolean {
+    // These features are very new (2024), so most browsers won't support them yet
+    // Check for :target-current and anchor() positioning support
+    try {
+      // Check if CSS.supports works for :target-current
+      const hasTargetCurrent = CSS.supports('selector(:target-current)');
+      
+      // Check for anchor positioning (experimental)
+      // This is a newer API, so we check multiple ways
+      const hasAnchor = 
+        'anchor' in CSS ||
+        'positionAnchor' in document.documentElement.style ||
+        CSS.supports('position-anchor', '--test');
+      
+      const supported = hasTargetCurrent && hasAnchor;
+      
+      log('Modern CSS support check:', {
+        'selector(:target-current)': hasTargetCurrent,
+        'anchor() positioning': hasAnchor,
+        'overall': supported,
+        'note': 'These are experimental features (2024), most browsers will use JS fallback'
+      });
+      
+      return supported;
+    } catch (e) {
+      log('CSS feature detection error:', e);
+      return false;
+    }
+  }
+
   function initScrollSpy() {
-    const tocLinks = document.querySelectorAll('[data-toc-link]');
-    const tocIndicator = document.querySelector('.toc-indicator') as HTMLElement;
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'RightSidebar.astro:115',
+        message: 'initScrollSpy called',
+        data: { timestamp: Date.now() },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'A'
+      })
+    }).catch(() => {});
+    // #endregion
 
-    if (tocLinks.length === 0) return;
+    const toc = document.querySelector('.toc') as HTMLElement;
+    if (!toc) {
+      warn('ToC container not found');
+      return;
+    }
+    
+    // Scope links and indicator to THIS specific ToC instance (not all ToCs on page)
+    const tocLinks = toc.querySelectorAll('[data-toc-link]');
+    const tocIndicator = toc.querySelector('.toc-indicator') as HTMLElement;
 
-    // Get heading IDs from ToC links
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'RightSidebar.astro:120',
+        message: 'ToC elements found',
+        data: { 
+          tocFound: !!toc, 
+          tocLinksCount: tocLinks.length,
+          tocIndicatorFound: !!tocIndicator,
+          tocLinks: Array.from(tocLinks).map(link => ({
+            href: link.getAttribute('href'),
+            text: link.textContent?.trim()
+          }))
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'B'
+      })
+    }).catch(() => {});
+    // #endregion
+
+    if (!toc || tocLinks.length === 0) {
+      warn('ToC not found or no links found');
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'RightSidebar.astro:122',
+          message: 'ToC initialization failed - missing elements',
+          data: { tocFound: !!toc, tocLinksCount: tocLinks.length },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'C'
+        })
+      }).catch(() => {});
+      // #endregion
+      return;
+    }
+
+    log('Initializing scroll-spy with', tocLinks.length, 'links');
+
+    // Check CSS support and mark accordingly
+    // NOTE: CSS scroll-spy features (:target-current, anchor()) are experimental
+    // and not widely supported yet. For now, always use JS fallback for reliability.
+    const useModernCSS = false; // Temporarily disabled until browser support improves
+    // const useModernCSS = supportsModernCSS(); // Uncomment when browser support is better
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'RightSidebar.astro:128',
+        message: 'CSS support check result',
+        data: { useModernCSS, detectedSupport: supportsModernCSS() },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'F'
+      })
+    }).catch(() => {});
+    // #endregion
+    
+    if (!useModernCSS) {
+      toc.classList.add('js-fallback');
+      log('Using JS fallback (CSS features not supported or disabled)');
+    } else {
+      log('Modern CSS features supported - using CSS scroll-spy');
+    }
+
+    // Get heading IDs from ToC links (scoped to this ToC instance only)
     const headingIds = Array.from(tocLinks)
       .map((link) => {
         const href = link.getAttribute('href');
@@ -75,39 +222,211 @@ const hasHeadings = filteredHeadings.length > 0;
       })
       .filter(Boolean);
 
-    // Get corresponding heading elements
-    const headingElements = headingIds
+    // Remove duplicates (in case same heading appears in multiple ToC instances)
+    const uniqueHeadingIds = Array.from(new Set(headingIds));
+    
+    log('Found heading IDs:', uniqueHeadingIds);
+
+    // Get corresponding heading elements (use unique IDs to avoid duplicates)
+    const headingElements = uniqueHeadingIds
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
 
-    if (headingElements.length === 0) return;
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'RightSidebar.astro:147',
+        message: 'Heading elements lookup',
+        data: { 
+          headingIds,
+          foundElements: headingElements.map(el => ({ id: el.id, tagName: el.tagName, text: el.textContent?.trim().substring(0, 50) })),
+          foundCount: headingElements.length,
+          missingIds: headingIds.filter(id => !document.getElementById(id))
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'D'
+      })
+    }).catch(() => {});
+    // #endregion
 
+    if (headingElements.length === 0) {
+      warn('No heading elements found for IDs:', headingIds);
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'RightSidebar.astro:151',
+          message: 'CRITICAL: No heading elements found',
+          data: { headingIds, allIdsInPage: Array.from(document.querySelectorAll('[id]')).map(el => el.id).slice(0, 20) },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'D'
+        })
+      }).catch(() => {});
+      // #endregion
+      return;
+    }
+
+    log('Found', headingElements.length, 'heading elements');
+
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'RightSidebar.astro:249',
+        message: 'Checking CSS support',
+        data: { useModernCSS, headingElementsCount: headingElements.length },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'F'
+      })
+    }).catch(() => {});
+    // #endregion
+
+    // Only use JS if CSS is not supported
+    if (useModernCSS) {
+      log('CSS scroll-spy active - JS observer not needed');
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'RightSidebar.astro:252',
+          message: 'RETURNING EARLY: Using CSS scroll-spy (JS observer skipped)',
+          data: { useModernCSS: true },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'F'
+        })
+      }).catch(() => {});
+      // #endregion
+      // Still handle click events for smooth scrolling
+      tocLinks.forEach((link) => {
+        link.addEventListener('click', (e) => {
+          const href = link.getAttribute('href');
+          if (!href) return;
+
+          const targetId = href.slice(1);
+          const targetElement = document.getElementById(targetId);
+
+          if (targetElement) {
+            e.preventDefault();
+            history.pushState(null, '', href);
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            log('Scrolled to:', targetId);
+          }
+        });
+      });
+      return;
+    }
+
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'RightSidebar.astro:272',
+        message: 'Proceeding with JS fallback (CSS not supported)',
+        data: { useModernCSS: false },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'F'
+      })
+    }).catch(() => {});
+    // #endregion
+
+    // JS Fallback Implementation
     let activeHeadingId: string | null = null;
 
     function setActiveHeading(id: string | null) {
       if (id === activeHeadingId) return;
+      
+      const previousId = activeHeadingId;
       activeHeadingId = id;
+      
+      log('Active heading changed:', previousId, '→', id);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'RightSidebar.astro:184',
+          message: 'Active heading changed',
+          data: { previousId, newId: id, scrollY: window.scrollY },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'E'
+        })
+      }).catch(() => {});
+      // #endregion
 
+      // Only update links and indicator in THIS ToC instance
       tocLinks.forEach((link) => {
         const href = link.getAttribute('href');
         const isActive = href === `#${id}`;
         link.classList.toggle('active', isActive);
 
         if (isActive && tocIndicator) {
-          const linkRect = link.getBoundingClientRect();
-          const tocRect = link.closest('.toc')?.getBoundingClientRect();
-
-          if (tocRect) {
-            const top = linkRect.top - tocRect.top;
+          // Position indicator relative to the ToC list container
+          // Use offsetTop for reliable positioning that works with scrolling
+          const linkElement = link as HTMLElement;
+          const tocList = toc.querySelector('.toc-list') as HTMLElement;
+          
+          if (tocList) {
+            // Calculate position relative to toc-list (accounts for padding/margins)
+            const linkOffsetTop = linkElement.offsetTop;
+            const listOffsetTop = tocList.offsetTop;
+            const top = linkOffsetTop - listOffsetTop;
+            
+            // Apply transform directly (transition is handled by CSS)
             tocIndicator.style.transform = `translateY(${top}px)`;
             tocIndicator.style.opacity = '1';
-            tocIndicator.style.height = `${linkRect.height}px`;
+            tocIndicator.style.height = `${linkElement.offsetHeight}px`;
+            
+            log('Indicator positioned at:', top, 'px, height:', linkElement.offsetHeight, 'px');
+            
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                location: 'RightSidebar.astro:381',
+                message: 'Indicator positioned',
+                data: { 
+                  activeId: id,
+                  linkText: link.textContent?.trim(),
+                  top,
+                  height: linkElement.offsetHeight,
+                  linkOffsetTop,
+                  listOffsetTop,
+                  scrollY: window.scrollY
+                },
+                timestamp: Date.now(),
+                sessionId: 'debug-session',
+                runId: 'run1',
+                hypothesisId: 'G'
+              })
+            }).catch(() => {});
+            // #endregion
           }
         }
       });
 
       if (!id && tocIndicator) {
         tocIndicator.style.opacity = '0';
+        log('No active heading - hiding indicator');
       }
     }
 
@@ -116,15 +435,66 @@ const hasHeadings = filteredHeadings.length > 0;
       threshold: [0, 1],
     };
 
+    log('Observer options:', observerOptions);
+
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'RightSidebar.astro:217',
+        message: 'Setting up IntersectionObserver',
+        data: { 
+          observerOptions,
+          headingElementsCount: headingElements.length,
+          headingIds: headingElements.map(el => el.id)
+        },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'run1',
+        hypothesisId: 'C'
+      })
+    }).catch(() => {});
+    // #endregion
+
     const visibleHeadings = new Map<string, IntersectionObserverEntry>();
 
     const observer = new IntersectionObserver((entries) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'RightSidebar.astro:226',
+          message: 'IntersectionObserver callback fired',
+          data: { 
+            entriesCount: entries.length,
+            entries: entries.map(e => ({
+              id: e.target.id,
+              isIntersecting: e.isIntersecting,
+              intersectionRatio: e.intersectionRatio,
+              boundingClientRect: {
+                top: e.boundingClientRect.top,
+                bottom: e.boundingClientRect.bottom
+              }
+            }))
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'C'
+        })
+      }).catch(() => {});
+      // #endregion
+
       entries.forEach((entry) => {
         const id = entry.target.id;
         if (entry.isIntersecting) {
           visibleHeadings.set(id, entry);
+          log('Heading entered viewport:', id, 'intersectionRatio:', entry.intersectionRatio);
         } else {
           visibleHeadings.delete(id);
+          log('Heading left viewport:', id);
         }
       });
 
@@ -133,6 +503,7 @@ const hasHeadings = filteredHeadings.length > 0;
           ([, a], [, b]) => a.boundingClientRect.top - b.boundingClientRect.top,
         );
         const [topId] = sortedVisible[0];
+        log('Visible headings:', Array.from(visibleHeadings.keys()), '→ Active:', topId);
         setActiveHeading(topId);
       } else {
         const scrollTop = window.scrollY;
@@ -145,11 +516,39 @@ const hasHeadings = filteredHeadings.length > 0;
             lastAbove = heading.id;
           }
         }
+        log('No visible headings, using last above:', lastAbove);
         setActiveHeading(lastAbove);
       }
     }, observerOptions);
 
-    headingElements.forEach((heading) => observer.observe(heading));
+    headingElements.forEach((heading) => {
+      observer.observe(heading);
+      log('Observing heading:', heading.id);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'RightSidebar.astro:261',
+          message: 'Observer.observe called',
+          data: { 
+            headingId: heading.id,
+            headingRect: {
+              top: heading.getBoundingClientRect().top,
+              bottom: heading.getBoundingClientRect().bottom,
+              height: heading.getBoundingClientRect().height
+            },
+            scrollY: window.scrollY
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'C'
+        })
+      }).catch(() => {});
+      // #endregion
+    });
 
     // Smooth scroll on click
     tocLinks.forEach((link) => {
@@ -165,6 +564,9 @@ const hasHeadings = filteredHeadings.length > 0;
           history.pushState(null, '', href);
           targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
           setActiveHeading(targetId);
+          log('Clicked link, scrolled to:', targetId);
+        } else {
+          warn('Target element not found for:', targetId);
         }
       });
     });
@@ -172,7 +574,35 @@ const hasHeadings = filteredHeadings.length > 0;
     // Initial active state
     requestAnimationFrame(() => {
       const scrollTop = window.scrollY;
+      log('Initial scroll position:', scrollTop);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: 'RightSidebar.astro:288',
+          message: 'Initial active state setup',
+          data: { 
+            scrollTop,
+            headingElements: headingElements.map(h => ({
+              id: h.id,
+              rect: {
+                top: h.getBoundingClientRect().top,
+                bottom: h.getBoundingClientRect().bottom
+              }
+            }))
+          },
+          timestamp: Date.now(),
+          sessionId: 'debug-session',
+          runId: 'run1',
+          hypothesisId: 'E'
+        })
+      }).catch(() => {});
+      // #endregion
+      
       if (scrollTop < 100 && headingElements[0]) {
+        log('Near top, setting first heading as active');
         setActiveHeading(headingElements[0].id);
         return;
       }
@@ -189,11 +619,33 @@ const hasHeadings = filteredHeadings.length > 0;
         }
       }
 
-      if (closest) setActiveHeading(closest.id);
+      if (closest) {
+        log('Initial active heading (closest to top):', closest.id, 'distance:', closestDistance);
+        setActiveHeading(closest.id);
+      } else {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'RightSidebar.astro:310',
+            message: 'WARNING: No closest heading found for initial state',
+            data: { scrollTop, headingElementsCount: headingElements.length },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'E'
+          })
+        }).catch(() => {});
+        // #endregion
+      }
     });
 
     // Cleanup on Astro navigation
-    document.addEventListener('astro:before-swap', () => observer.disconnect());
+    document.addEventListener('astro:before-swap', () => {
+      log('Cleaning up observer');
+      observer.disconnect();
+    });
   }
 
   if (document.readyState === 'loading') {
@@ -208,6 +660,8 @@ const hasHeadings = filteredHeadings.length > 0;
 <style>
   .toc {
     position: relative;
+    /* Modern CSS scroll-spy (progressive enhancement) */
+    scroll-target-group: auto;
   }
 
   .toc-header {
@@ -230,6 +684,35 @@ const hasHeadings = filteredHeadings.length > 0;
     margin: 0;
   }
 
+  /* Modern CSS approach: :target-current with anchor positioning */
+  .toc a:target-current {
+    anchor-name: --active;
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  /* CSS-only indicator using anchor positioning */
+  .toc::after {
+    content: '';
+    position: absolute;
+    position-anchor: --active;
+    top: anchor(top);
+    left: 0;
+    width: 2px;
+    height: 1.5rem;
+    background-color: var(--color-accent);
+    transition: top 0.15s ease-out;
+    pointer-events: none;
+    border-radius: 1px;
+    opacity: 0;
+  }
+
+  /* Show indicator when there's an active target */
+  .toc:has(a:target-current)::after {
+    opacity: 1;
+  }
+
+  /* Fallback: JS-controlled indicator (used when CSS features not supported) */
   .toc-indicator {
     position: absolute;
     left: 0;
@@ -244,6 +727,11 @@ const hasHeadings = filteredHeadings.length > 0;
       height 0.15s ease-out;
     pointer-events: none;
     border-radius: 1px;
+  }
+
+  /* Hide CSS indicator when JS fallback is active */
+  .toc.js-fallback::after {
+    display: none;
   }
 
   .toc-empty {

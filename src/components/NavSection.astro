@@ -1,0 +1,44 @@
+---
+/**
+ * NavSection.astro
+ *
+ * Reusable navigation section component with collapsible functionality
+ */
+
+interface Props {
+  sectionId: string;
+  title: string;
+  items: Array<{ title: string; href: string }>;
+  currentPath?: string;
+}
+
+const { sectionId, title, items, currentPath = '' } = Astro.props;
+---
+
+<div class="nav-section" data-section={sectionId}>
+  <button
+    type="button"
+    class="nav-section-header"
+    aria-expanded="true"
+    aria-controls={`section-${sectionId}`}
+  >
+    <span class="text-xs font-semibold text-secondary uppercase tracking-wide">
+      {title}
+    </span>
+    <span class="nav-section-icon" aria-hidden="true"></span>
+  </button>
+  <div class="nav-section-content expanded" id={`section-${sectionId}`}>
+    <div class="nav-section-items">
+      {items.map((item) => (
+        <a
+          href={item.href}
+          class:list={['nav-item', { active: currentPath === item.href }]}
+          data-nav-item
+        >
+          {item.title}
+        </a>
+      ))}
+    </div>
+  </div>
+</div>
+

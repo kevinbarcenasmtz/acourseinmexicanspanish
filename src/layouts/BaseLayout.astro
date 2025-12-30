@@ -8,6 +8,7 @@
  * - 3-column CSS Grid (left sidebar | content | right sidebar)
  * - Responsive breakpoints (mobile/tablet/desktop)
  * - Dark mode support with localStorage persistence
+ * - Sidebar toggle for tablet/desktop
  * - Mobile drawer overlay infrastructure
  * - Skip link for accessibility
  *
@@ -56,14 +57,28 @@ const currentPath = Astro.url.pathname;
     <link rel="preload" href="/fonts/chilanga-regular.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preload" href="/fonts/atkinson-regular.ttf" as="font" type="font/ttf" crossorigin />
 
-    <!-- Dark Mode: Prevent flash of wrong theme -->
+    <!-- Dark Mode & Sidebar State: Prevent flash -->
     <script is:inline>
       (function () {
-        const stored = localStorage.getItem('theme');
+        // Dark mode
+        const storedTheme = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        if (stored === 'dark' || (!stored && prefersDark)) {
+        if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
           document.documentElement.classList.add('dark');
+        }
+
+        // Sidebar state - apply immediately to prevent flash
+        const sidebarVisible = localStorage.getItem('sidebar-visible');
+        const isDesktop = window.innerWidth >= 1024;
+        const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+
+        // Default: hidden on tablet, visible on desktop
+        const shouldBeVisible = sidebarVisible === null ? isDesktop : sidebarVisible === 'true';
+
+        if (isTablet && shouldBeVisible) {
+          document.documentElement.classList.add('sidebar-visible-init');
+        } else if (isDesktop && !shouldBeVisible) {
+          document.documentElement.classList.add('sidebar-collapsed-init');
         }
       })();
     </script>
@@ -81,7 +96,7 @@ const currentPath = Astro.url.pathname;
       </slot>
 
       <!-- Main Layout Grid -->
-      <div class="app-body">
+      <div class="app-body" id="app-body">
         <!-- Left Sidebar (Navigation) -->
         <aside
           id="left-sidebar"
@@ -89,7 +104,24 @@ const currentPath = Astro.url.pathname;
           aria-label="Site navigation"
         >
           <slot name="left-sidebar">
-            <LeftSidebar currentPath={currentPath} />
+            <!-- #region agent log -->
+            <script is:inline>
+              fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  location: 'BaseLayout.astro:107',
+                  message: 'Desktop sidebar LeftSidebar slot rendering',
+                  data: { slot: 'left-sidebar', sidebarId: 'left-sidebar' },
+                  timestamp: Date.now(),
+                  sessionId: 'debug-session',
+                  runId: 'run1',
+                  hypothesisId: 'A'
+                })
+              }).catch(() => {});
+            </script>
+            <!-- #endregion -->
+            <LeftSidebar currentPath={currentPath} context="desktop" />
           </slot>
         </aside>
 
@@ -143,7 +175,24 @@ const currentPath = Astro.url.pathname;
       </div>
       <div class="drawer-body">
         <slot name="mobile-nav">
-          <LeftSidebar currentPath={currentPath} />
+          <!-- #region agent log -->
+          <script is:inline>
+            fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                location: 'BaseLayout.astro:161',
+                message: 'Mobile drawer LeftSidebar slot rendering',
+                data: { slot: 'mobile-nav', drawerId: 'left-drawer' },
+                timestamp: Date.now(),
+                sessionId: 'debug-session',
+                runId: 'run1',
+                hypothesisId: 'E'
+              })
+            }).catch(() => {});
+          </script>
+          <!-- #endregion -->
+          <LeftSidebar currentPath={currentPath} context="mobile" />
         </slot>
       </div>
     </div>
@@ -180,8 +229,12 @@ const currentPath = Astro.url.pathname;
       </div>
     </div>
 
-    <!-- Mobile Drawer Script -->
+    <!-- Scripts -->
     <script>
+      // ==========================================================================
+      // Mobile Drawer Functionality
+      // ==========================================================================
+
       const overlay = document.getElementById('drawer-overlay');
       const leftDrawer = document.getElementById('left-drawer');
       const rightDrawer = document.getElementById('right-drawer');
@@ -202,24 +255,19 @@ const currentPath = Astro.url.pathname;
           'select:not([disabled])',
           '[tabindex]:not([tabindex="-1"])',
         ].join(',');
-
         return Array.from(container.querySelectorAll(focusableSelectors)) as HTMLElement[];
       }
 
       function setupFocusTrap(drawer: HTMLElement) {
         const focusableElements = getFocusableElements(drawer);
-
         if (focusableElements.length === 0) return;
-
         firstFocusableElement = focusableElements[0];
         lastFocusableElement = focusableElements[focusableElements.length - 1];
-
         focusTrapActive = true;
       }
 
       function handleFocusTrap(e: KeyboardEvent) {
         if (!focusTrapActive || e.key !== 'Tab') return;
-
         if (e.shiftKey) {
           if (document.activeElement === firstFocusableElement) {
             e.preventDefault();
@@ -241,27 +289,22 @@ const currentPath = Astro.url.pathname;
 
       function openDrawer(drawer: HTMLElement | null, toggle: HTMLElement | null) {
         if (!drawer || !overlay) return;
-
         drawer.classList.add('open');
         overlay.classList.add('visible');
         document.body.classList.add('body-scroll-lock');
         toggle?.setAttribute('aria-expanded', 'true');
-
         setupFocusTrap(drawer);
-
         const focusable = drawer.querySelector('button, a, input');
         (focusable as HTMLElement)?.focus();
       }
 
       function closeDrawer(drawer: HTMLElement | null, toggle: HTMLElement | null) {
         if (!drawer || !overlay) return;
-
         drawer.classList.remove('open');
         overlay.classList.remove('visible');
         document.body.classList.remove('body-scroll-lock');
         toggle?.setAttribute('aria-expanded', 'false');
         toggle?.focus();
-
         removeFocusTrap();
       }
 
@@ -270,7 +313,7 @@ const currentPath = Astro.url.pathname;
         closeDrawer(rightDrawer, tocToggle);
       }
 
-      // Toggle buttons
+      // Mobile menu toggle
       menuToggle?.addEventListener('click', () => {
         const isOpen = leftDrawer?.classList.contains('open');
         if (isOpen) {
@@ -281,6 +324,7 @@ const currentPath = Astro.url.pathname;
         }
       });
 
+      // ToC toggle
       tocToggle?.addEventListener('click', () => {
         const isOpen = rightDrawer?.classList.contains('open');
         if (isOpen) {
@@ -303,7 +347,7 @@ const currentPath = Astro.url.pathname;
       // Overlay click closes
       overlay?.addEventListener('click', closeAllDrawers);
 
-      // Escape key closes
+      // Escape key closes drawers
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           closeAllDrawers();
@@ -317,6 +361,102 @@ const currentPath = Astro.url.pathname;
           setTimeout(() => closeDrawer(rightDrawer, tocToggle), 100);
         });
       });
+
+      // ==========================================================================
+      // Sidebar Toggle Functionality (Tablet/Desktop)
+      // ==========================================================================
+
+      (function initSidebarToggle() {
+        const STORAGE_KEY = 'sidebar-visible';
+        const appBody = document.getElementById('app-body');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+
+        // Early return if elements don't exist
+        if (!appBody || !sidebarToggle) return;
+
+        // Create const references that TypeScript trusts in nested functions
+        const body = appBody;
+        const toggle = sidebarToggle;
+
+        function isTablet(): boolean {
+          return window.innerWidth >= 640 && window.innerWidth < 1024;
+        }
+
+        function isDesktop(): boolean {
+          return window.innerWidth >= 1024;
+        }
+
+        function getStoredState(): boolean {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored === null) {
+            return isDesktop();
+          }
+          return stored === 'true';
+        }
+
+        function setSidebarState(isVisible: boolean): void {
+          document.documentElement.classList.remove(
+            'sidebar-visible-init',
+            'sidebar-collapsed-init'
+          );
+
+          if (isTablet()) {
+            body.classList.toggle('sidebar-visible', isVisible);
+            body.classList.remove('sidebar-collapsed');
+          } else if (isDesktop()) {
+            body.classList.toggle('sidebar-collapsed', !isVisible);
+            body.classList.remove('sidebar-visible');
+          } else {
+            body.classList.remove('sidebar-visible', 'sidebar-collapsed');
+          }
+
+          toggle.setAttribute('aria-expanded', String(isVisible));
+
+          const openIcon = toggle.querySelector('.sidebar-icon-open');
+          const closedIcon = toggle.querySelector('.sidebar-icon-closed');
+          if (openIcon && closedIcon) {
+            openIcon.classList.toggle('hidden', !isVisible);
+            closedIcon.classList.toggle('hidden', isVisible);
+          }
+
+          document.body.classList.toggle('sidebar-collapsed', !isVisible);
+        }
+
+        function toggleSidebar(): void {
+          const isCurrentlyVisible = isTablet()
+            ? body.classList.contains('sidebar-visible')
+            : !body.classList.contains('sidebar-collapsed');
+
+          const newState = !isCurrentlyVisible;
+          setSidebarState(newState);
+          localStorage.setItem(STORAGE_KEY, String(newState));
+        }
+
+        function init(): void {
+          const shouldBeVisible = getStoredState();
+          setSidebarState(shouldBeVisible);
+        }
+
+        let resizeTimeout: number;
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = window.setTimeout(() => {
+            const shouldBeVisible = getStoredState();
+            setSidebarState(shouldBeVisible);
+          }, 100);
+        });
+
+        toggle.addEventListener('click', toggleSidebar);
+
+        document.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+            e.preventDefault();
+            toggleSidebar();
+          }
+        });
+
+        init();
+      })();
     </script>
 
     <style>

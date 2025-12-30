@@ -12,12 +12,18 @@
  */
 
 import { getCollection } from 'astro:content';
+import { staticPages, frontMatter, appendices } from '../lib/nav-data';
+import NavSection from './NavSection.astro';
+import ThemeToggle from './ThemeToggle.astro';
 
 interface Props {
   currentPath?: string;
+  /** Context identifier to make IDs unique (e.g., 'desktop', 'mobile') */
+  context?: string;
 }
 
-const { currentPath = '' } = Astro.props;
+const { currentPath = '', context = 'desktop' } = Astro.props;
+const searchInputId = `sidebar-search-${context}`;
 
 // Fetch all lessons from content collection
 const allLessons = await getCollection('lessons');
@@ -40,30 +46,9 @@ const lessonsBySection = allLessons
     },
     {} as Record<string, Array<{ slug: string; title: string; href: string }>>,
   );
-
-// Static navigation items
-const staticPages = {
-  home: { title: 'Home', href: '/' },
-  about: { title: 'About', href: '/about' },
-};
-
-const frontMatter = [
-  { title: 'Abbreviations and Symbols', href: '/front-matter/abbreviations' },
-  { title: 'Guide to IPA Pronunciation', href: '/front-matter/ipa-guide' },
-  { title: 'Introduction to Mexican Spanish', href: '/front-matter/introduction' },
-  { title: 'How to Use This Resource', href: '/front-matter/how-to-use' },
-];
-
-const appendices = [
-  { title: 'Verb Conjugation Tables', href: '/appendices/verb-tables' },
-  { title: 'Spanish-English Glossary', href: '/appendices/glossary' },
-  { title: 'Idioms & Expressions', href: '/appendices/idioms' },
-  { title: 'Cultural Notes Compendium', href: '/appendices/cultural-notes' },
-  { title: 'Grammar Reference', href: '/appendices/grammar-reference' },
-];
 ---
 
-<div id="left-sidebar-container" class="sidebar-container" style="width: 100%;">
+<div id="left-sidebar-container" class="sidebar-container" style="width: 100%;" data-sidebar-context={context}>
   <div class="sidebar-content">
     <!-- Search Bar -->
     <div class="p-4 pb-2">
@@ -82,10 +67,11 @@ const appendices = [
         </svg>
         <input
           type="text"
-          id="sidebar-search"
+          id={searchInputId}
           placeholder="Search lessons... (Press /)"
           class="search-input"
           aria-label="Search navigation"
+          data-sidebar-context={context}
         />
       </div>
     </div>
@@ -114,202 +100,58 @@ const appendices = [
       <div class="my-3 h-px bg-border"></div>
 
       <!-- Front Matter Section -->
-      <div class="nav-section" data-section="front-matter">
-        <button
-          type="button"
-          class="nav-section-header"
-          aria-expanded="true"
-          aria-controls="section-front-matter"
-        >
-          <span class="text-xs font-semibold text-secondary uppercase tracking-wide"
-            >Front Matter</span
-          >
-          <span class="nav-section-icon" aria-hidden="true"></span>
-        </button>
-        <div class="nav-section-content expanded" id="section-front-matter">
-          <div class="nav-section-items">
-            {
-              frontMatter.map((item) => (
-                <a
-                  href={item.href}
-                  class:list={['nav-item', { active: currentPath === item.href }]}
-                  data-nav-item
-                >
-                  {item.title}
-                </a>
-              ))
-            }
-          </div>
-        </div>
-      </div>
+      <NavSection
+        sectionId="front-matter"
+        title="Front Matter"
+        items={frontMatter}
+        currentPath={currentPath}
+      />
 
       <!-- Foundation Section -->
-      {
-        lessonsBySection.Foundation && (
-          <div class="nav-section" data-section="foundation">
-            <button
-              type="button"
-              class="nav-section-header"
-              aria-expanded="true"
-              aria-controls="section-foundation"
-            >
-              <span class="text-xs font-semibold text-secondary uppercase tracking-wide">
-                Foundation
-              </span>
-              <span class="nav-section-icon" aria-hidden="true" />
-            </button>
-            <div class="nav-section-content expanded" id="section-foundation">
-              <div class="nav-section-items">
-                {lessonsBySection.Foundation.map((lesson) => (
-                  <a
-                    href={lesson.href}
-                    class:list={['nav-item', { active: currentPath === lesson.href }]}
-                    data-nav-item
-                  >
-                    {lesson.title}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        )
-      }
+      {lessonsBySection.Foundation && (
+        <NavSection
+          sectionId="foundation"
+          title="Foundation"
+          items={lessonsBySection.Foundation}
+          currentPath={currentPath}
+        />
+      )}
 
       <!-- Intermediate Section -->
-      {
-        lessonsBySection.Intermediate && (
-          <div class="nav-section" data-section="intermediate">
-            <button
-              type="button"
-              class="nav-section-header"
-              aria-expanded="true"
-              aria-controls="section-intermediate"
-            >
-              <span class="text-xs font-semibold text-secondary uppercase tracking-wide">
-                Intermediate
-              </span>
-              <span class="nav-section-icon" aria-hidden="true" />
-            </button>
-            <div class="nav-section-content expanded" id="section-intermediate">
-              <div class="nav-section-items">
-                {lessonsBySection.Intermediate.map((lesson) => (
-                  <a
-                    href={lesson.href}
-                    class:list={['nav-item', { active: currentPath === lesson.href }]}
-                    data-nav-item
-                  >
-                    {lesson.title}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        )
-      }
+      {lessonsBySection.Intermediate && (
+        <NavSection
+          sectionId="intermediate"
+          title="Intermediate"
+          items={lessonsBySection.Intermediate}
+          currentPath={currentPath}
+        />
+      )}
 
       <!-- Advanced Section -->
-      {
-        lessonsBySection.Advanced && (
-          <div class="nav-section" data-section="advanced">
-            <button
-              type="button"
-              class="nav-section-header"
-              aria-expanded="true"
-              aria-controls="section-advanced"
-            >
-              <span class="text-xs font-semibold text-secondary uppercase tracking-wide">
-                Advanced
-              </span>
-              <span class="nav-section-icon" aria-hidden="true" />
-            </button>
-            <div class="nav-section-content expanded" id="section-advanced">
-              <div class="nav-section-items">
-                {lessonsBySection.Advanced.map((lesson) => (
-                  <a
-                    href={lesson.href}
-                    class:list={['nav-item', { active: currentPath === lesson.href }]}
-                    data-nav-item
-                  >
-                    {lesson.title}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        )
-      }
+      {lessonsBySection.Advanced && (
+        <NavSection
+          sectionId="advanced"
+          title="Advanced"
+          items={lessonsBySection.Advanced}
+          currentPath={currentPath}
+        />
+      )}
 
       <!-- Appendices Section -->
-      <div class="nav-section" data-section="appendices">
-        <button
-          type="button"
-          class="nav-section-header"
-          aria-expanded="true"
-          aria-controls="section-appendices"
-        >
-          <span class="text-xs font-semibold text-secondary uppercase tracking-wide"
-            >Appendices</span
-          >
-          <span class="nav-section-icon" aria-hidden="true"></span>
-        </button>
-        <div class="nav-section-content expanded" id="section-appendices">
-          <div class="nav-section-items">
-            {
-              appendices.map((item) => (
-                <a
-                  href={item.href}
-                  class:list={['nav-item', { active: currentPath === item.href }]}
-                  data-nav-item
-                >
-                  {item.title}
-                </a>
-              ))
-            }
-          </div>
-        </div>
-      </div>
+      <NavSection
+        sectionId="appendices"
+        title="Appendices"
+        items={appendices}
+        currentPath={currentPath}
+      />
 
       <!-- Divider -->
       <div class="my-3 h-px bg-border"></div>
 
       <!-- Dark Mode Toggle -->
-      <button
-        type="button"
-        id="theme-toggle"
-        class="nav-item w-full justify-start"
-        aria-label="Toggle dark mode"
-      >
-        <svg
-          id="theme-icon-sun"
-          class="h-4 w-4 hidden dark:block"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-          ></path>
-        </svg>
-        <svg
-          id="theme-icon-moon"
-          class="h-4 w-4 block dark:hidden"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-          ></path>
-        </svg>
-        <span id="theme-text-light" class="block dark:hidden">Dark Mode</span>
-        <span id="theme-text-dark" class="hidden dark:block">Light Mode</span>
-      </button>
+      <div class="nav-item w-full justify-start p-0">
+        <ThemeToggle showLabel={true} variant="button" />
+      </div>
     </nav>
   </div>
 
@@ -324,427 +166,106 @@ const appendices = [
 </div>
 
 <script>
+  import { initSidebar } from '../lib/sidebar/index';
+
+  // #region agent log
+  function logDuplicateIDCheck() {
+    const searchInputs = document.querySelectorAll('[id^="sidebar-search-"]');
+    const count = searchInputs.length;
+    const locations = Array.from(searchInputs).map((el) => {
+      const inputEl = el;
+      const parent = inputEl.closest('aside, .drawer, .sidebar-container');
+      const isVisible = 'offsetParent' in inputEl ? inputEl.offsetParent !== null : false;
+      return {
+        id: inputEl.id,
+        parentId: parent?.id || parent?.className || 'unknown',
+        isVisible: isVisible,
+        context: inputEl.getAttribute('data-sidebar-context') || 'unknown',
+        location: parent?.closest('#left-sidebar') ? 'desktop-sidebar' : 
+                 parent?.closest('#left-drawer') ? 'mobile-drawer' : 'unknown'
+      };
+    });
+    
+    fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        location: 'LeftSidebar.astro:168',
+        message: 'Post-fix: ID check - sidebar-search inputs found',
+        data: { count, locations, allIds: Array.from(searchInputs).map(el => el.id) },
+        timestamp: Date.now(),
+        sessionId: 'debug-session',
+        runId: 'post-fix',
+        hypothesisId: 'A'
+      })
+    }).catch(() => {});
+    
+    if (count > 1) {
+      const duplicateIds = Array.from(searchInputs).map(el => el.id);
+      const hasDuplicates = new Set(duplicateIds).size !== duplicateIds.length;
+      if (hasDuplicates) {
+        fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'LeftSidebar.astro:168',
+            message: 'DUPLICATE ID STILL DETECTED',
+            data: { duplicateCount: count, locations, duplicateIds },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'post-fix',
+            hypothesisId: 'A'
+          })
+        }).catch(() => {});
+      } else {
+        fetch('http://127.0.0.1:7243/ingest/23eb47dd-4f31-40a6-99f9-107b58697ad1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            location: 'LeftSidebar.astro:168',
+            message: 'FIX VERIFIED: All IDs are unique',
+            data: { count, locations, allIds: duplicateIds },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'post-fix',
+            hypothesisId: 'A'
+          })
+        }).catch(() => {});
+      }
+    }
+  }
+  // #endregion
+
   // Wait for DOM to be fully loaded
   document.addEventListener('DOMContentLoaded', () => {
-    // ============================================================================
-    // Sidebar State Management
-    // ============================================================================
-
-    const STORAGE_KEYS = {
-      width: 'sidebar-width',
-      collapsed: 'sidebar-collapsed-sections',
-    };
-
-    // ============================================================================
-    // Collapsible Sections
-    // ============================================================================
-
-    function initCollapsibleSections() {
-      const sections = document.querySelectorAll('.nav-section');
-      const collapsedSections = getCollapsedSections();
-
-      sections.forEach((section) => {
-        const button = section.querySelector('.nav-section-header') as HTMLButtonElement;
-        const content = section.querySelector('.nav-section-content') as HTMLElement;
-        const sectionId = section.getAttribute('data-section');
-
-        if (!button || !content || !sectionId) return;
-
-        // Restore collapsed state from localStorage
-        if (collapsedSections.includes(sectionId)) {
-          content.classList.remove('expanded');
-          section.classList.remove('expanded');
-          button.setAttribute('aria-expanded', 'false');
-        } else {
-          section.classList.add('expanded');
-        }
-
-        button.addEventListener('click', () => toggleSection(section, button, content, sectionId));
-      });
-    }
-
-    function toggleSection(
-      section: Element,
-      button: HTMLButtonElement,
-      content: HTMLElement,
-      sectionId: string,
-    ) {
-      const isExpanded = content.classList.contains('expanded');
-
-      if (isExpanded) {
-        content.classList.remove('expanded');
-        section.classList.remove('expanded');
-        button.setAttribute('aria-expanded', 'false');
-        addCollapsedSection(sectionId);
-      } else {
-        content.classList.add('expanded');
-        section.classList.add('expanded');
-        button.setAttribute('aria-expanded', 'true');
-        removeCollapsedSection(sectionId);
+    // #region agent log
+    logDuplicateIDCheck();
+    // #endregion
+    
+    // Find all sidebar containers and initialize each one's search
+    const containers = document.querySelectorAll('[data-sidebar-context]');
+    containers.forEach((container) => {
+      const context = container.getAttribute('data-sidebar-context');
+      const searchInputId = `sidebar-search-${context}`;
+      const searchInput = document.getElementById(searchInputId);
+      if (searchInput) {
+        initSidebar(searchInputId);
       }
-    }
-
-    function getCollapsedSections(): string[] {
-      const stored = localStorage.getItem(STORAGE_KEYS.collapsed);
-      return stored ? JSON.parse(stored) : [];
-    }
-
-    function addCollapsedSection(sectionId: string) {
-      const collapsed = getCollapsedSections();
-      if (!collapsed.includes(sectionId)) {
-        collapsed.push(sectionId);
-        localStorage.setItem(STORAGE_KEYS.collapsed, JSON.stringify(collapsed));
-      }
-    }
-
-    function removeCollapsedSection(sectionId: string) {
-      const collapsed = getCollapsedSections().filter((id) => id !== sectionId);
-      localStorage.setItem(STORAGE_KEYS.collapsed, JSON.stringify(collapsed));
-    }
-
-    // ============================================================================
-    // Keyboard Navigation
-    // ============================================================================
-
-    function initKeyboardNavigation() {
-      const searchInput = document.getElementById('sidebar-search') as HTMLInputElement;
-
-      // Global "/" shortcut to focus search
-      document.addEventListener('keydown', (e) => {
-        // Skip if user is typing in an input
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-          return;
-        }
-
-        if (e.key === '/' && document.activeElement !== searchInput) {
-          e.preventDefault();
-          searchInput?.focus();
-          return;
-        }
-
-        // Arrow key navigation
-        if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
-          return;
-        }
-
-        e.preventDefault();
-
-        const items = Array.from(document.querySelectorAll('[data-nav-item]')) as HTMLElement[];
-        const activeElement = document.activeElement as HTMLElement;
-        const isNavItem = activeElement?.hasAttribute('data-nav-item');
-
-        let currentIndex = -1;
-
-        if (isNavItem) {
-          // Focus is on a nav item, use it
-          currentIndex = items.indexOf(activeElement);
-        } else {
-          // Focus is elsewhere (probably body), find the .active nav item
-          const activeNavItem = document.querySelector('[data-nav-item].active') as HTMLElement;
-          if (activeNavItem) {
-            currentIndex = items.indexOf(activeNavItem);
-          } else {
-            // No active item, start from first item
-            currentIndex = -1;
-          }
-        }
-
-        switch (e.key) {
-          case 'ArrowDown':
-            focusItem(items, currentIndex + 1);
-            break;
-          case 'ArrowUp':
-            focusItem(items, currentIndex - 1);
-            break;
-          case 'ArrowLeft':
-            if (isNavItem) {
-              collapseCurrentSection(activeElement);
-            }
-            break;
-          case 'ArrowRight':
-            if (isNavItem) {
-              expandCurrentSection(activeElement);
-            }
-            break;
-          case 'Home':
-            focusItem(items, 0);
-            break;
-          case 'End':
-            focusItem(items, items.length - 1);
-            break;
-        }
-      });
-    }
-
-    function focusItem(items: HTMLElement[], index: number) {
-      if (index < 0) index = items.length - 1;
-      if (index >= items.length) index = 0;
-      items[index]?.focus();
-    }
-
-    function collapseCurrentSection(element: HTMLElement) {
-      const section = element.closest('.nav-section');
-      if (!section) return;
-
-      const button = section.querySelector('.nav-section-header') as HTMLButtonElement;
-      const content = section.querySelector('.nav-section-content') as HTMLElement;
-      const sectionId = section.getAttribute('data-section');
-
-      if (button && content && sectionId && content.classList.contains('expanded')) {
-        toggleSection(section, button, content, sectionId);
-      }
-    }
-
-    function expandCurrentSection(element: HTMLElement) {
-      const section = element.closest('.nav-section');
-      if (!section) return;
-
-      const button = section.querySelector('.nav-section-header') as HTMLButtonElement;
-      const content = section.querySelector('.nav-section-content') as HTMLElement;
-      const sectionId = section.getAttribute('data-section');
-
-      if (button && content && sectionId && !content.classList.contains('expanded')) {
-        toggleSection(section, button, content, sectionId);
-      }
-    }
-
-    // ============================================================================
-    // Search Filtering
-    // ============================================================================
-
-    function initSearch() {
-      const searchInput = document.getElementById('sidebar-search') as HTMLInputElement;
-      const navItems = document.querySelectorAll('[data-nav-item]');
-      const sections = document.querySelectorAll('.nav-section');
-      const nav = document.querySelector('.sidebar-nav') as HTMLElement;
-
-      if (!searchInput) return;
-
-      // Create empty state element
-      const emptyState = document.createElement('div');
-      emptyState.id = 'search-empty-state';
-      emptyState.className = 'hidden text-center py-8 px-4 text-secondary';
-      emptyState.innerHTML = '<p class="text-sm">No matching lessons</p>';
-      nav?.appendChild(emptyState);
-
-      searchInput.addEventListener('input', (e) => {
-        const query = (e.target as HTMLInputElement).value.toLowerCase().trim();
-
-        // Remove previous highlights
-        document.querySelectorAll('.search-highlight').forEach((el) => {
-          const parent = el.parentNode;
-          if (parent) {
-            parent.replaceChild(document.createTextNode(el.textContent || ''), el);
-            parent.normalize();
-          }
-        });
-
-        if (!query) {
-          // Show all items and sections
-          navItems.forEach((item) => item.classList.remove('hidden'));
-          sections.forEach((section) => section.classList.remove('hidden'));
-          emptyState.classList.add('hidden');
-          return;
-        }
-
-        let hasVisibleItems = false;
-
-        // Filter and highlight nav items
-        navItems.forEach((item) => {
-          const textContent = item.textContent?.toLowerCase() || '';
-
-          if (textContent.includes(query)) {
-            item.classList.remove('hidden');
-            hasVisibleItems = true;
-
-            // Highlight matching text
-            highlightText(item as HTMLElement, query);
-          } else {
-            item.classList.add('hidden');
-          }
-        });
-
-        // Hide empty sections
-        sections.forEach((section) => {
-          const visibleItems = section.querySelectorAll('[data-nav-item]:not(.hidden)');
-          if (visibleItems.length === 0) {
-            section.classList.add('hidden');
-          } else {
-            section.classList.remove('hidden');
-          }
-        });
-
-        // Show/hide empty state
-        if (hasVisibleItems) {
-          emptyState.classList.add('hidden');
-        } else {
-          emptyState.classList.remove('hidden');
-        }
-      });
-    }
-
-    function highlightText(element: HTMLElement, query: string) {
-      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
-
-      const nodesToReplace: Array<{ node: Node; text: string }> = [];
-
-      let node;
-      while ((node = walker.nextNode())) {
-        const text = node.textContent || '';
-        const lowerText = text.toLowerCase();
-
-        if (lowerText.includes(query)) {
-          nodesToReplace.push({ node, text });
-        }
-      }
-
-      nodesToReplace.forEach(({ node, text }) => {
-        const lowerText = text.toLowerCase();
-        const index = lowerText.indexOf(query);
-
-        if (index === -1) return;
-
-        const beforeText = text.substring(0, index);
-        const matchText = text.substring(index, index + query.length);
-        const afterText = text.substring(index + query.length);
-
-        const fragment = document.createDocumentFragment();
-
-        if (beforeText) fragment.appendChild(document.createTextNode(beforeText));
-
-        const mark = document.createElement('mark');
-        mark.className = 'search-highlight';
-        mark.textContent = matchText;
-        fragment.appendChild(mark);
-
-        if (afterText) fragment.appendChild(document.createTextNode(afterText));
-
-        node.parentNode?.replaceChild(fragment, node);
-      });
-    }
-
-    // ============================================================================
-    // Dark Mode Toggle
-    // ============================================================================
-
-    function initDarkMode() {
-      const toggleButton = document.getElementById('theme-toggle');
-
-      if (!toggleButton) return;
-
-      toggleButton.addEventListener('click', () => {
-        const isDark = document.documentElement.classList.contains('dark');
-
-        if (isDark) {
-          document.documentElement.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
-        } else {
-          document.documentElement.classList.add('dark');
-          localStorage.setItem('theme', 'dark');
-        }
-      });
-    }
-
-    // ============================================================================
-    // Resizable Sidebar
-    // ============================================================================
-
-    function initResizable() {
-      const container = document.getElementById('left-sidebar-container') as HTMLElement;
-      const handle = container?.querySelector('.resize-handle') as HTMLElement;
-
-      // The actual sidebar element in the grid is the parent <aside>
-      const sidebar = document.getElementById('left-sidebar') as HTMLElement;
-
-      // Get the grid container
-      const gridContainer = document.querySelector('.app-body') as HTMLElement;
-
-      if (!container || !handle || !sidebar || !gridContainer) return;
-
-      // Restore width from localStorage
-      const storedWidth = localStorage.getItem(STORAGE_KEYS.width);
-      if (storedWidth) {
-        const width = parseInt(storedWidth, 10);
-        const minWidth = parseInt(
-          getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width-min'),
-          10,
-        );
-        const maxWidth = parseInt(
-          getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width-max'),
-          10,
-        );
-
-        if (width >= minWidth && width <= maxWidth) {
-          sidebar.style.width = `${width}px`;
-          updateGridColumns(gridContainer, width);
-        }
-      }
-
-      let isResizing = false;
-      let startX = 0;
-      let startWidth = 0;
-
-      handle.addEventListener('mousedown', (e) => {
-        isResizing = true;
-        startX = e.clientX;
-        startWidth = sidebar.offsetWidth;
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
-        e.preventDefault();
-      });
-
-      document.addEventListener('mousemove', (e) => {
-        if (!isResizing) return;
-
-        const delta = e.clientX - startX;
-        const newWidth = startWidth + delta;
-        const minWidth = parseInt(
-          getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width-min'),
-          10,
-        );
-        const maxWidth = parseInt(
-          getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width-max'),
-          10,
-        );
-
-        if (newWidth >= minWidth && newWidth <= maxWidth) {
-          sidebar.style.width = `${newWidth}px`;
-          updateGridColumns(gridContainer, newWidth);
-        }
-      });
-
-      document.addEventListener('mouseup', () => {
-        if (isResizing) {
-          isResizing = false;
-          document.body.style.cursor = '';
-          document.body.style.userSelect = '';
-
-          // Save to localStorage
-          localStorage.setItem(STORAGE_KEYS.width, sidebar.offsetWidth.toString());
-        }
-      });
-    }
-
-    function updateGridColumns(gridContainer: HTMLElement, sidebarWidth: number) {
-      // Get the ToC width from CSS variable
-      const tocWidth = getComputedStyle(document.documentElement)
-        .getPropertyValue('--toc-width')
-        .trim();
-
-      // Update grid template columns: sidebar | content (1fr) | toc
-      gridContainer.style.gridTemplateColumns = `${sidebarWidth}px 1fr ${tocWidth}`;
-    }
-
-    // ============================================================================
-    // Initialize All Features
-    // ============================================================================
-
-    initCollapsibleSections();
-    initKeyboardNavigation();
-    initSearch();
-    initResizable();
-    initDarkMode();
-  }); // End DOMContentLoaded
+    });
+  });
+
+  // Re-initialize on Astro navigation
+  document.addEventListener('astro:after-swap', () => {
+    // #region agent log
+    logDuplicateIDCheck();
+    // #endregion
+    
+    // Find all sidebar search inputs and initialize each one
+    const searchInputs = document.querySelectorAll('[id^="sidebar-search-"]');
+    searchInputs.forEach((input) => {
+      initSidebar(input.id);
+    });
+  });
 </script>
 
 <style>
@@ -795,34 +316,36 @@ const appendices = [
     background-color: var(--color-accent-bg);
   }
 
-  /* +/× Icon */
+  /* Chevron Icon (▶/▼) */
   .nav-section-icon {
-    font-size: 1.25rem;
-    font-weight: 300;
+    font-size: 1rem;
+    font-weight: 400;
     line-height: 1;
     color: var(--color-text-secondary);
+    display: inline-block;
+    transition: transform 0.2s ease-out;
+    transform: rotate(0deg);
   }
 
-  /* Hide default content, show via ::before */
-  .nav-section-icon {
-    font-family: system-ui, sans-serif;
-  }
-
-  /* Collapsed shows + */
+  /* Collapsed: chevron points right (▶) */
   .nav-section:not(.expanded) .nav-section-icon::before {
-    content: '+';
+    content: '▶';
   }
 
-  /* Expanded shows × */
+  /* Expanded: chevron points down (▼) - rotated 90° */
+  .nav-section.expanded .nav-section-icon {
+    transform: rotate(90deg);
+  }
+
   .nav-section.expanded .nav-section-icon::before {
-    content: '×';
+    content: '▶';
   }
 
   /* Vertical bar for expanded sections */
   .nav-section-items {
     padding-top: 0.25rem;
     padding-left: 0.75rem;
-    border-left: 2px solid var(--color-border);
+    border-left: 8px solid var(--color-border);
     margin-left: 0.75rem;
     display: flex;
     flex-direction: column;

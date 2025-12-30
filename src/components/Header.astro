@@ -1,65 +1,289 @@
 ---
 /**
  * Header.astro
+ *
+ * Global header with:
+ * - Mobile (<640px): hamburger menu (left) + ToC toggle (right)
+ * - Tablet (640-1024px): sidebar toggle (left) + ToC toggle (right)
+ * - Desktop (>1024px): sidebar toggle (left) + logo (center)
  */
+
  interface Props {
   siteTitle?: string;
 }
+
 const { siteTitle = 'A Course in Mexican Spanish' } = Astro.props;
 ---
 
 <header class="app-header">
-  <div class="flex h-full items-center justify-between px-4">
-    <!-- Mobile Menu Toggle (Left) -->
-    <button
-      type="button"
-      id="mobile-menu-toggle"
-      class="lg:hidden theme-toggle"
-      aria-label="Open navigation menu"
-      aria-expanded="false"
-      aria-controls="left-drawer"
-    >
-      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </button>
+  <div class="header-container">
+    <!-- Left Side: Menu/Sidebar Toggle -->
+    <div class="header-left">
+      <!-- Mobile Menu Toggle (hamburger) - visible < 640px -->
+      <button
+        type="button"
+        id="mobile-menu-toggle"
+        class="header-button mobile-only"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+        aria-controls="left-drawer"
+      >
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
 
-    <!-- Logo/Brand -->
-    <a href="/" class="flex items-center gap-3 no-underline group">
+      <!-- Sidebar Toggle (for tablet/desktop) - visible >= 640px -->
+      <button
+        type="button"
+        id="sidebar-toggle"
+        class="header-button tablet-desktop-only"
+        aria-label="Toggle sidebar"
+        aria-expanded="true"
+        aria-controls="left-sidebar"
+      >
+        <!-- Sidebar open icon (collapse) -->
+        <svg
+          class="icon sidebar-icon-open"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+        </svg>
+        <!-- Sidebar closed icon (expand) -->
+        <svg
+          class="icon sidebar-icon-closed"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Center: Logo/Brand -->
+    <a href="/" class="header-logo">
       <!-- Icon badge -->
-      <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#c41e1e] text-[#f7b32b] font-display text-lg font-bold">
-        MX
-      </span>
-      <!-- Full title (desktop) -->
-      <span class="font-display text-xl hidden sm:inline rotulo-text-sm">
-        {siteTitle}
-      </span>
+      <span class="logo-badge">MX</span>
+      <!-- Full title (tablet+) - Regular text in light mode, two-line style in dark mode -->
+      <div class="logo-text-wrapper tablet-desktop-only">
+        <span class="logo-text">{siteTitle}</span>
+        <div class="two-line">
+          <span class="two-line-top">A Course in</span>
+          <span class="two-line-bottom">MEXICAN SPANISH</span>
+        </div>
+      </div>
       <!-- Short title (mobile) -->
-      <span class="font-display text-lg sm:hidden rotulo-text-sm">
-        Mexican Spanish
-      </span>
+      <span class="logo-text-short mobile-only">Mexican Spanish</span>
     </a>
 
-    <!-- Mobile ToC Toggle (Right) -->
-    <button
-      type="button"
-      id="mobile-toc-toggle"
-      class="lg:hidden theme-toggle"
-      aria-label="Open table of contents"
-      aria-expanded="false"
-      aria-controls="right-drawer"
-    >
-      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 10h16M4 14h10M4 18h7"></path>
-      </svg>
-    </button>
+    <!-- Right Side: ToC Toggle -->
+    <div class="header-right">
+      <!-- ToC Toggle - visible < 1024px -->
+      <button
+        type="button"
+        id="mobile-toc-toggle"
+        class="header-button mobile-tablet-only"
+        aria-label="Open table of contents"
+        aria-expanded="false"
+        aria-controls="right-drawer"
+      >
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 10h16M4 14h10M4 18h7"></path>
+        </svg>
+      </button>
+
+      <!-- Spacer for desktop (keeps logo centered) -->
+      <div class="desktop-only header-spacer"></div>
+    </div>
   </div>
 </header>
+
+<style>
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 1rem;
+  }
+
+  .header-left,
+  .header-right {
+    display: flex;
+    align-items: center;
+    min-width: 2.5rem; /* Ensures space even when empty */
+  }
+
+  .header-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .header-button:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+  }
+
+  .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  /* Logo */
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--color-text-primary);
+  }
+
+  .header-logo:hover {
+    text-decoration: none;
+  }
+
+  .logo-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    background-color: #c41e1e;
+    color: #f7b32b;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  .logo-text-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo-text,
+  .logo-text-short {
+    font-family: var(--font-display);
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .logo-text-short {
+    font-size: 1.125rem;
+  }
+
+  /* In light mode, show regular text, hide two-line */
+  .logo-text-wrapper .two-line {
+    display: none;
+  }
+
+  .logo-text-wrapper .logo-text {
+    display: block;
+  }
+
+  /* In dark mode, show two-line style, hide regular text */
+  :global(.dark) .logo-text-wrapper .logo-text {
+    display: none;
+  }
+
+  :global(.dark) .logo-text-wrapper .two-line {
+    display: block;
+  }
+
+  .header-spacer {
+    width: 2.5rem;
+  }
+
+  /* Sidebar icon states */
+  .sidebar-icon-closed {
+    display: none;
+  }
+
+  :global(body.sidebar-collapsed) .sidebar-icon-open {
+    display: none;
+  }
+
+  :global(body.sidebar-collapsed) .sidebar-icon-closed {
+    display: block;
+  }
+
+  /* ===========================================
+     Responsive visibility classes
+     =========================================== */
+
+  /* Mobile only: < 640px */
+  .mobile-only {
+    display: flex;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-only {
+      display: none;
+    }
+  }
+
+  /* Tablet and desktop: >= 640px */
+  .tablet-desktop-only {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .tablet-desktop-only {
+      display: flex;
+    }
+  }
+
+  /* Mobile and tablet: < 1024px */
+  .mobile-tablet-only {
+    display: flex;
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-tablet-only {
+      display: none;
+    }
+  }
+
+  /* Desktop only: >= 1024px */
+  .desktop-only {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .desktop-only {
+      display: flex;
+    }
+  }
+</style>
