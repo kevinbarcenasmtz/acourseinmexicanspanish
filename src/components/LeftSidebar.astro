@@ -225,8 +225,19 @@ const lessonsBySection = allLessons
 
     const collapsedSections = getCollapsedSections();
 
+    // DISABLE transitions before applying state
+    const allSections = document.querySelectorAll('.nav-section');
+    allSections.forEach((section) => {
+      // Disable both chevron and content transitions
+      const chevron = section.querySelector('.nav-section-chevron');
+      const content = section.querySelector('.nav-section-content');
+      
+      if (chevron) chevron.style.transition = 'none';
+      if (content) content.style.transition = 'none';
+    });
+
     // Expand all sections NOT in the collapsed list
-    document.querySelectorAll('.nav-section').forEach((section) => {
+    allSections.forEach((section) => {
       const sectionId = section.getAttribute('data-section');
       if (sectionId && !collapsedSections.includes(sectionId)) {
         section.classList.add('expanded');
@@ -235,16 +246,18 @@ const lessonsBySection = allLessons
       }
     });
 
-    // Also expand section containing current page
-    const activeItem = document.querySelector('.nav-item.active');
-    if (activeItem) {
-      const section = activeItem.closest('.nav-section');
-      if (section) {
-        section.classList.add('expanded');
-        const button = section.querySelector('.nav-section-header');
-        if (button) button.setAttribute('aria-expanded', 'true');
-      }
-    }
+    // RE-ENABLE transitions after browser has painted
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        allSections.forEach((section) => {
+          const chevron = section.querySelector('.nav-section-chevron');
+          const content = section.querySelector('.nav-section-content');
+          
+          if (chevron) chevron.style.transition = '';
+          if (content) content.style.transition = '';
+        });
+      });
+    });
   })();
 </script>
 

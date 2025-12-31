@@ -307,7 +307,8 @@ const hasHeadings = filteredHeadings.length > 0;
     border-radius: 1px;
   }
 
-  .toc.js-fallback::after {
+  /* JS-added class - use :global() for JS-added classes */
+  .toc:global(.js-fallback)::after {
     display: none;
   }
 

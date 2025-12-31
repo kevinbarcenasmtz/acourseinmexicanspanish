@@ -361,6 +361,8 @@ const currentPath = Astro.url.pathname;
         }
 
         function setSidebarState(isVisible: boolean): void {
+          const gridContainer = document.getElementById('app-body');
+          
           document.documentElement.classList.remove(
             'sidebar-visible-init',
             'sidebar-collapsed-init',
@@ -372,6 +374,28 @@ const currentPath = Astro.url.pathname;
           } else if (isDesktop()) {
             body.classList.toggle('sidebar-collapsed', !isVisible);
             body.classList.remove('sidebar-visible');
+            
+            // Clear inline styles when collapsing so CSS class can work
+            if (!isVisible && gridContainer) {
+              gridContainer.style.gridTemplateColumns = '';
+            }
+            // If expanding and there's a custom width, restore it
+            else if (isVisible && gridContainer) {
+              const storedWidth = localStorage.getItem('sidebar-width');
+              if (storedWidth) {
+                const sidebar = document.getElementById('left-sidebar');
+                if (sidebar) {
+                  const width = parseInt(storedWidth, 10);
+                  const tocWidth = getComputedStyle(document.documentElement)
+                    .getPropertyValue('--toc-width')
+                    .trim();
+                  gridContainer.style.gridTemplateColumns = `${width}px 1fr ${tocWidth}`;
+                }
+              } else {
+                // No custom width, let CSS handle it
+                gridContainer.style.gridTemplateColumns = '';
+              }
+            }
           } else {
             body.classList.remove('sidebar-visible', 'sidebar-collapsed');
           }

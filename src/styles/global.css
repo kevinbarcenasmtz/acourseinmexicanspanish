@@ -381,7 +381,6 @@
         Prose / Content Area
         -------------------------------------------- */
   .prose {
-    max-width: var(--content-max-width);
     line-height: 1.7;
   }
 
@@ -661,6 +660,11 @@
     box-shadow: 0 0 0 3px var(--color-accent-bg);
   }
 
+  /* Dark mode: More visible focus ring */
+  .dark .search-input:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  }
+
   /* ==========================================================================
         App Shell Layout
         ========================================================================== */
@@ -813,8 +817,7 @@
   }
 
   .content-wrapper {
-    max-width: var(--content-max-width);
-    margin: 0 auto;
+    margin: 0;
     width: 100%;
   }
 
