@@ -159,7 +159,20 @@
   display: block;
 }
 
-/* 9G: Dark Mode Hero - Red gradient with yellow shadow */
+/* Light mode - Blue gradient with orange stroke and yellow shadow */
+.two-line-top {
+  background-image: linear-gradient(0deg, #1e3a8a, #3b82f6);
+  -webkit-text-stroke: 0.05rem #ea580c;
+  filter: drop-shadow(0.2rem 0.2rem 0 #fbbf24);
+}
+
+.two-line-bottom {
+  background-image: linear-gradient(0deg, #7c2d12, #dc2626);
+  -webkit-text-stroke: 0.05rem #fbbf24;
+  filter: drop-shadow(0.2rem 0.2rem 0 #ea580c);
+}
+
+/* Dark mode - Red gradient with dark stroke and yellow shadow */
 .dark .two-line-top {
   background-image: linear-gradient(0deg, #a31515, #dc2626);
   -webkit-text-stroke: 0.05rem #4a1c1c;
@@ -206,7 +219,18 @@
     font-size: var(--text-h1);
   }
 
-  /* 9G Dark Mode Color Scheme for Chilanga headings (h1, h2) */
+  /* Light mode - Blue gradient for Chilanga headings */
+  h1,
+  h2 {
+    background-image: linear-gradient(0deg, #1e3a8a, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    -webkit-text-stroke: 0.05rem #ea580c;
+    filter: drop-shadow(0.2rem 0.2rem 0 #fbbf24);
+  }
+
+  /* Dark mode - Red gradient for Chilanga headings */
   .dark h1,
   .dark h2 {
     background-image: linear-gradient(0deg, #a31515, #dc2626);
@@ -921,14 +945,31 @@
     background: #2d1810; /* Deep chocolate brown for dark mode */
   }
 
-  /* 9G Rótulo Text Style */
+  /* 9G Rótulo Text Style - Blue for light mode */
   .style-9g {
-    background-image: linear-gradient(0deg, #a31515, #dc2626);
+    background-image: linear-gradient(0deg, #1e3a8a, #3b82f6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-text-stroke: 0.05rem #ea580c;
+    filter: drop-shadow(0.2rem 0.2rem 0 #fbbf24);
+  }
+
+  /* 9G Rótulo Text Style - Red for dark mode */
+  .dark .style-9g {
+    background-image: linear-gradient(0deg, #a31515, #dc2626);
     -webkit-text-stroke: 0.05rem #4a1c1c;
     filter: drop-shadow(0.2rem 0.2rem 0 #f7b32b);
+  }
+
+  /* Alternative red style for light mode (like "MEXICANO" in the photo) */
+  .style-9g-red {
+    background-image: linear-gradient(0deg, #7c2d12, #dc2626);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    -webkit-text-stroke: 0.05rem #fbbf24;
+    filter: drop-shadow(0.2rem 0.2rem 0 #ea580c);
   }
 
   .body-scroll-lock {
