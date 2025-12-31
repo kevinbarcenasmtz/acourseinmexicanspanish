@@ -21,8 +21,7 @@ const { showLabel = true, variant = 'button' } = Astro.props;
 
 <button
   type="button"
-  id="theme-toggle"
-  class:list={['theme-toggle-btn', { 'theme-toggle-icon-only': variant === 'icon' }]}
+  class:list={['theme-toggle-btn', 'theme-toggle', { 'theme-toggle-icon-only': variant === 'icon' }]}
   aria-label="Toggle dark mode"
 >
   <!-- Sun icon (shown in dark mode) -->
@@ -68,20 +67,33 @@ const { showLabel = true, variant = 'button' } = Astro.props;
 </button>
 
 <script>
+  // Use a Set to track which buttons already have listeners attached
+  const initializedButtons = new WeakSet();
+
   function initThemeToggle() {
-    const toggleButton = document.getElementById('theme-toggle');
-    if (!toggleButton) return;
+    // Find all theme toggle buttons (there may be multiple: desktop sidebar + mobile drawer)
+    // Use .theme-toggle-btn to be specific (not .theme-toggle which is also used for drawer close buttons)
+    const toggleButtons = document.querySelectorAll('.theme-toggle-btn');
+    
+    toggleButtons.forEach((toggleButton) => {
+      // Skip if already initialized
+      if (initializedButtons.has(toggleButton)) return;
+      
+      // Mark as initialized
+      initializedButtons.add(toggleButton);
+      
+      // Add click listener
+      toggleButton.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.contains('dark');
 
-    toggleButton.addEventListener('click', () => {
-      const isDark = document.documentElement.classList.contains('dark');
-
-      if (isDark) {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-      } else {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      }
+        if (isDark) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      });
     });
   }
 

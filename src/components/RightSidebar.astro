@@ -108,6 +108,12 @@ const hasHeadings = filteredHeadings.length > 0;
 
     // JS Fallback Implementation
     let activeHeadingId: string | null = null;
+    
+    // FIX: Track manual scroll to prevent observer interference
+    const manualScrollState = {
+      isManualScroll: false,
+      manualScrollTimeout: undefined as number | undefined,
+    };
 
     function setActiveHeading(id: string | null) {
       if (id === activeHeadingId) return;
@@ -120,14 +126,13 @@ const hasHeadings = filteredHeadings.length > 0;
 
         if (isActive && tocIndicator) {
           const linkElement = link as HTMLElement;
-          const tocList = toc.querySelector('.toc-list') as HTMLElement;
-
-          if (tocList) {
-            const top = linkElement.offsetTop - tocList.offsetTop;
-            tocIndicator.style.transform = `translateY(${top}px)`;
-            tocIndicator.style.opacity = '1';
-            tocIndicator.style.height = `${linkElement.offsetHeight}px`;
-          }
+          
+          // FIX: Use offsetTop directly - already relative to .toc (the offsetParent)
+          const top = linkElement.offsetTop;
+          
+          tocIndicator.style.transform = `translateY(${top}px)`;
+          tocIndicator.style.opacity = '1';
+          tocIndicator.style.height = `${linkElement.offsetHeight}px`;
         }
       });
 
@@ -138,13 +143,16 @@ const hasHeadings = filteredHeadings.length > 0;
 
     // IntersectionObserver setup
     const observerOptions: IntersectionObserverInit = {
-      rootMargin: '-80px 0px -60% 0px',
+      rootMargin: '-80px 0px -40% 0px', // Less aggressive - gives wider viewport (top 60% instead of top 40%)
       threshold: [0, 1],
     };
 
     const visibleHeadings = new Map<string, IntersectionObserverEntry>();
 
     const observer = new IntersectionObserver((entries) => {
+      // FIX: Don't update active state during manual scroll
+      if (manualScrollState.isManualScroll) return;
+      
       entries.forEach((entry) => {
         const id = entry.target.id;
         if (entry.isIntersecting) {
@@ -160,24 +168,46 @@ const hasHeadings = filteredHeadings.length > 0;
         );
         setActiveHeading(sortedVisible[0][0]);
       } else {
+        // No headings in intersection viewport - determine which should be active
         const scrollTop = window.scrollY;
-        let lastAbove: string | null = null;
-
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+        
+        // If within 100px of bottom, activate last heading
+        if (distanceFromBottom < 100 && headingElements.length > 0) {
+          const lastHeading = headingElements[headingElements.length - 1];
+          setActiveHeading(lastHeading.id);
+          return;
+        }
+        
+        // Find the heading closest to the top of the viewport (best for both scroll directions)
+        let closestHeading: HTMLElement | null = null;
+        let closestDistance = Infinity;
+        const targetScroll = scrollTop + 100; // 100px offset for header
+        
         for (const heading of headingElements) {
           const rect = heading.getBoundingClientRect();
-          const absoluteTop = rect.top + scrollTop;
-          if (absoluteTop < scrollTop + 100) {
-            lastAbove = heading.id;
+          const headingTop = rect.top + scrollTop;
+          
+          // Only consider headings that are above or near the target scroll position
+          if (headingTop <= targetScroll) {
+            const distance = targetScroll - headingTop;
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closestHeading = heading;
+            }
           }
         }
-        setActiveHeading(lastAbove);
+        
+        setActiveHeading(closestHeading?.id || null);
       }
     }, observerOptions);
 
     headingElements.forEach((heading) => observer.observe(heading));
 
-    // Click handlers
-    addClickHandlers(tocLinks, setActiveHeading);
+    // Click handlers - pass manual scroll tracking state
+    addClickHandlers(tocLinks, setActiveHeading, manualScrollState);
 
     // Initial active state
     requestAnimationFrame(() => {
@@ -210,7 +240,14 @@ const hasHeadings = filteredHeadings.length > 0;
     });
   }
 
-  function addClickHandlers(links: NodeListOf<Element>, setActive?: (id: string) => void) {
+  function addClickHandlers(
+    links: NodeListOf<Element>,
+    setActive?: (id: string) => void,
+    manualScrollState?: {
+      isManualScroll: boolean;
+      manualScrollTimeout: number | undefined;
+    }
+  ) {
     links.forEach((link) => {
       link.addEventListener('click', (e) => {
         const href = link.getAttribute('href');
@@ -221,9 +258,31 @@ const hasHeadings = filteredHeadings.length > 0;
 
         if (targetElement) {
           e.preventDefault();
-          history.pushState(null, '', href);
-          targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          setActive?.(targetId);
+          
+          // FIX: Set manual scroll flag and immediately update active state
+          if (manualScrollState) {
+            manualScrollState.isManualScroll = true;
+            if (manualScrollState.manualScrollTimeout !== undefined) {
+              clearTimeout(manualScrollState.manualScrollTimeout);
+            }
+            
+            // Immediately set active (prevents flash)
+            setActive?.(targetId);
+            
+            // Scroll to element
+            history.pushState(null, '', href);
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Clear flag after scroll animation completes (~600ms for smooth scroll)
+            manualScrollState.manualScrollTimeout = window.setTimeout(() => {
+              manualScrollState.isManualScroll = false;
+            }, 1000);
+          } else {
+            // Fallback if manualScrollState not provided (for useModernCSS case)
+            history.pushState(null, '', href);
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setActive?.(targetId);
+          }
         }
       });
     });
