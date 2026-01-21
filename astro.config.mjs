@@ -5,7 +5,7 @@ import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
 export default defineConfig({
-  output: 'server', // Enables on-demand rendering for auth middleware
+  output: 'server', // Server-side rendering for authentication
   adapter: cloudflare(),
   vite: {
     plugins: [tailwindcss()],

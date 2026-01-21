@@ -22,33 +22,46 @@ function isPublicAssetPath(pathname: string) {
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const { cookies, redirect, url } = context;
-  const pathname = url.pathname;
-
-  // Allow public routes
-  if (PUBLIC_ROUTES.includes(pathname)) {
+  // Skip middleware during build/prerendering
+  // During prerendering, request.headers is not available and accessing it causes warnings
+  if (import.meta.env.BUILD) {
     return next();
   }
 
-  // Allow static assets through without auth checks
-  if (isPublicAssetPath(pathname)) {
+  // Wrap in try-catch to handle cases where request might not be fully available
+  try {
+    const { cookies, redirect, url } = context;
+    const pathname = url.pathname;
+
+    // Allow public routes
+    if (PUBLIC_ROUTES.includes(pathname)) {
+      return next();
+    }
+
+    // Allow static assets through without auth checks
+    if (isPublicAssetPath(pathname)) {
+      return next();
+    }
+
+    // Check for valid session cookie
+    const sessionToken = cookies.get(COOKIE_NAME);
+    const accessCode = import.meta.env.ACCESS_CODE;
+
+    if (!accessCode) {
+      console.error('ACCESS_CODE environment variable not set!');
+      return new Response('Server configuration error', { status: 500 });
+    }
+
+    // Validate session
+    if (sessionToken?.value === accessCode) {
+      return next();
+    }
+
+    // No valid session - redirect to login
+    return redirect('/login');
+  } catch (error) {
+    // During prerendering, some context properties might not be available
+    // In that case, just allow the request through
     return next();
   }
-
-  // Check for valid session cookie
-  const sessionToken = cookies.get(COOKIE_NAME);
-  const accessCode = import.meta.env.ACCESS_CODE;
-
-  if (!accessCode) {
-    console.error('ACCESS_CODE environment variable not set!');
-    return new Response('Server configuration error', { status: 500 });
-  }
-
-  // Validate session
-  if (sessionToken?.value === accessCode) {
-    return next();
-  }
-
-  // No valid session - redirect to login
-  return redirect('/login');
 });
