@@ -12,5 +12,10 @@ export default defineConfig({
   },
   image: {
     service: { entrypoint: 'astro/assets/services/noop' }
+  },
+  // Explicitly disable experimental sessions to avoid KV requirement
+  experimental: {
+    // @ts-ignore - sessions option exists
+    sessions: false
   }
 });

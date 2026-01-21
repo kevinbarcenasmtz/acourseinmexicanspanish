@@ -1,0 +1,3 @@
+# Local development environment variables
+# Copy this file to .dev.vars and set your actual values
+ACCESS_CODE=your-password-here
