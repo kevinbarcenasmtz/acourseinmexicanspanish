@@ -6,10 +6,13 @@
  * - Mobile (<640px): hamburger menu (left) + ToC toggle (right)
  * - Tablet (640-1024px): sidebar toggle (left) + ToC toggle (right)
  * - Desktop (>1024px): sidebar toggle (left) + logo (center)
- *
- * FIXED: Using <picture> element instead of CSS content property
- * for better browser support and no NS_Binding errors
  */
+
+// Import SVGs as Astro components
+import DesktopLogoLight from '../../public/images/rotulo-header-desktop-light.svg';
+import DesktopLogoDark from '../../public/images/rotulo-header-desktop-dark.svg';
+import MobileLogoLight from '../../public/images/rotulo-header-mobile-light.svg';
+import MobileLogoDark from '../../public/images/rotulo-header-mobile-dark.svg';
 
 interface Props {
   siteTitle?: string;
@@ -64,26 +67,15 @@ const { siteTitle = 'A Course in Mexican Spanish' } = Astro.props;
     </div>
 
     <a href="/" class="header-logo">
-      <!-- Full title (tablet+) - SVG is 528×52, aspect ratio ~10.15:1 -->
-      <img
-        src="/images/rotulo-header-desktop-light.svg"
-        alt="A Course in Mexican Spanish"
-        class="logo-img tablet-desktop-only"
-        width="528"
-        height="52"
-        data-light-src="/images/rotulo-header-desktop-light.svg"
-        data-dark-src="/images/rotulo-header-desktop-dark.svg"
-      />
-      <!-- Short title (mobile) - SVG is 117×20, aspect ratio ~5.85:1 -->
-      <img
-        src="/images/rotulo-header-mobile-light.svg"
-        alt="Mexican Spanish"
-        class="logo-img-short mobile-only"
-        width="117"
-        height="20"
-        data-light-src="/images/rotulo-header-mobile-light.svg"
-        data-dark-src="/images/rotulo-header-mobile-dark.svg"
-      />
+      <!-- Full title (tablet+) - Light mode -->
+      <DesktopLogoLight class="logo-svg tablet-desktop-only light-only" />
+      <!-- Full title (tablet+) - Dark mode -->
+      <DesktopLogoDark class="logo-svg tablet-desktop-only dark-only" />
+      
+      <!-- Short title (mobile) - Light mode -->
+      <MobileLogoLight class="logo-svg mobile-only light-only" />
+      <!-- Short title (mobile) - Dark mode -->
+      <MobileLogoDark class="logo-svg mobile-only dark-only" />
     </a>
 
     <!-- Right Side: ToC Toggle -->
@@ -108,63 +100,76 @@ const { siteTitle = 'A Course in Mexican Spanish' } = Astro.props;
   </div>
 </header>
 
-<script>
-  // Handle theme toggle for header logo images
-  function updateHeaderLogos() {
-    const isDark = document.documentElement.classList.contains('dark');
-    const logoImages = document.querySelectorAll('.logo-img, .logo-img-short');
-
-    logoImages.forEach((element) => {
-      const img = element as HTMLImageElement;
-      const lightSrc = img.getAttribute('data-light-src');
-      const darkSrc = img.getAttribute('data-dark-src');
-
-      if (lightSrc && darkSrc) {
-        img.src = isDark ? darkSrc : lightSrc;
-      }
-    });
-  }
-
-  // Update on initial load
-  updateHeaderLogos();
-
-  // Listen for theme changes via MutationObserver (watches for .dark class changes)
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.attributeName === 'class') {
-        updateHeaderLogos();
-      }
-    });
-  });
-
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  });
-
-  // Listen for Astro page transitions
-  document.addEventListener('astro:after-swap', () => {
-    updateHeaderLogos();
-  });
-
-  // Clean up observer on page unload
-  document.addEventListener('astro:before-swap', () => {
-    observer.disconnect();
-  });
-</script>
-
 <style>
-  /* Logo images */
-  .logo-img {
-    height: 66px;
+  /* Logo SVGs - base styles */
+  .logo-svg {
+    height: auto;
     width: auto;
-    display: block;
+    max-width: 100%;
   }
-
-  .logo-img-short {
-    height: 40px;
-    width: auto;
+  
+  /* Light mode (default) */
+  /* Mobile: show light, hide dark */
+  .mobile-only.logo-svg.light-only {
     display: block;
+    height: 36px; /* Scale up mobile logo from 20px to 32px */
+  }
+  
+  .mobile-only.logo-svg.dark-only {
+    display: none;
+  }
+  
+  /* Desktop: hide light (will show at 640px), hide dark */
+  .tablet-desktop-only.logo-svg.light-only {
+    display: none;
+  }
+  
+  .tablet-desktop-only.logo-svg.dark-only {
+    display: none;
+  }
+  
+  /* Responsive: >= 640px in light mode */
+  @media (min-width: 640px) {
+    .mobile-only.logo-svg.light-only {
+      display: none;
+    }
+    
+    .tablet-desktop-only.logo-svg.light-only {
+      display: block;
+      height: 66px;
+    }
+  }
+  
+  /* Dark mode */
+  /* Mobile: hide light, show dark */
+  :global(.dark) .mobile-only.logo-svg.light-only {
+    display: none;
+  }
+  
+  :global(.dark) .mobile-only.logo-svg.dark-only {
+    display: block;
+    height: 36px; /* Scale up mobile logo from 20px to 32px */
+  }
+  
+  /* Desktop: hide light, hide dark (will show at 640px) */
+  :global(.dark) .tablet-desktop-only.logo-svg.light-only {
+    display: none;
+  }
+  
+  :global(.dark) .tablet-desktop-only.logo-svg.dark-only {
+    display: none;
+  }
+  
+  /* Responsive: >= 640px in dark mode */
+  @media (min-width: 640px) {
+    :global(.dark) .mobile-only.logo-svg.dark-only {
+      display: none;
+    }
+    
+    :global(.dark) .tablet-desktop-only.logo-svg.dark-only {
+      display: block;
+      height: 66px;
+    }
   }
 
   .header-container {
