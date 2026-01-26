@@ -298,7 +298,6 @@ const hasHeadings = filteredHeadings.length > 0;
 <style>
   .toc {
     position: relative;
-    scroll-target-group: auto;
   }
 
   .toc-header {
@@ -321,32 +320,6 @@ const hasHeadings = filteredHeadings.length > 0;
     margin: 0;
   }
 
-  /* Modern CSS scroll-spy (progressive enhancement) */
-  .toc :global(a:target-current) {
-    anchor-name: --active;
-    color: var(--color-accent);
-    font-weight: 600;
-  }
-
-  .toc::after {
-    content: '';
-    position: absolute;
-    position-anchor: --active;
-    top: anchor(top);
-    left: 0;
-    width: 2px;
-    height: 1.5rem;
-    background-color: var(--color-accent);
-    transition: top 0.15s ease-out;
-    pointer-events: none;
-    border-radius: 1px;
-    opacity: 0;
-  }
-
-  .toc:has(:global(a:target-current))::after {
-    opacity: 1;
-  }
-
   /* JS fallback indicator */
   .toc-indicator {
     position: absolute;
@@ -362,11 +335,6 @@ const hasHeadings = filteredHeadings.length > 0;
       height 0.15s ease-out;
     pointer-events: none;
     border-radius: 1px;
-  }
-
-  /* JS-added class - use :global() for JS-added classes */
-  .toc:global(.js-fallback)::after {
-    display: none;
   }
 
   .toc-empty {

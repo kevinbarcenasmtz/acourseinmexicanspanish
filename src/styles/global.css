@@ -24,8 +24,8 @@
 
   --color-border: #e7e0d5;
 
-  --color-accent: #c50300;
-  --color-accent-hover: #a30200;
+  --color-accent: #3F82AC;
+  --color-accent-hover: #64abd8;
   --color-accent-bg: #fff1f0;
 
   /* --------------------------------------------
@@ -124,67 +124,6 @@
   --color-accent: #0c90cd; /* Cyan accent (matches shadow) */
   --color-accent-hover: #0284c7; /* Darker cyan */
   --color-accent-bg: #0c4a6e; /* Dark blue background */
-}
-
-/* ==========================================================================
-               Rótulo Styles - Traditional Mexican Sign Painting
-               Light mode: Floral white bg, red→coral text, orange stroke, golden shadow
-               Dark mode: Dark gray bg, red→yellow text, cream stroke, cyan shadow
-               ========================================================================== */
-
-/* Two-line base styles */
-.two-line {
-  text-align: center;
-  line-height: 1.1;
-}
-
-.two-line-top {
-  font-family: var(--font-display);
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  background-size: 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-  display: block;
-  margin-bottom: -0.15em;
-}
-
-.two-line-bottom {
-  font-family: var(--font-display);
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  background-size: 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
-  display: block;
-}
-
-/* Light mode - Red→Coral gradient with orange stroke and golden shadow */
-.two-line-top {
-  background-image: linear-gradient(0deg, #c50300, #fc8568);
-  -webkit-text-stroke: 0.025rem #e85a0e;
-  filter: drop-shadow(-0.11rem 0.11rem 0 #ffd500);
-}
-
-.two-line-bottom {
-  background-image: linear-gradient(0deg, #c50300, #fc8568);
-  -webkit-text-stroke: 0.025rem #e85a0e;
-  filter: drop-shadow(-0.14rem 0.14rem 0 #ffd500);
-}
-
-/* Dark mode - Red→Yellow gradient with cream stroke and cyan shadow */
-.dark .two-line-top {
-  background-image: linear-gradient(0deg, #ff1101, #ffea07);
-  -webkit-text-stroke: 0.03rem #f7efd1;
-  filter: drop-shadow(-0.1rem 0.1rem 0 #0c90cd);
-}
-
-.dark .two-line-bottom {
-  background-image: linear-gradient(0deg, #ff1101, #ffea07);
-  -webkit-text-stroke: 0.03rem #f7efd1;
-  filter: drop-shadow(-0.12rem 0.12rem 0 #0c90cd);
 }
 
 /* ==========================================================================
@@ -348,9 +287,9 @@
   .nav-item:focus,
   .nav-item:focus-visible,
   .nav-item[data-focused='true'] {
-    background-color: rgba(197, 3, 0, 0.1) !important;
-    border-left-color: #c50300 !important;
-    color: var(--color-text-primary) !important;
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    border-left-color: var(--color-accent);
+    color: var(--color-text-primary);
     outline: none;
   }
 
@@ -365,23 +304,23 @@
   .nav-item.active:focus,
   .nav-item.active:focus-visible,
   .nav-item.active[data-focused='true'] {
-    background-color: rgba(197, 3, 0, 0.15) !important;
-    border-left-color: #c50300 !important;
+    background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    border-left-color: var(--color-accent);
   }
 
   /* Dark mode - cyan accent for focus */
   .dark .nav-item:focus,
   .dark .nav-item:focus-visible,
   .dark .nav-item[data-focused='true'] {
-    background-color: rgba(12, 144, 205, 0.2) !important;
-    border-left-color: #0c90cd !important;
+    background-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    border-left-color: var(--color-accent);
   }
 
   .dark .nav-item.active:focus,
   .dark .nav-item.active:focus-visible,
   .dark .nav-item.active[data-focused='true'] {
-    background-color: rgba(12, 144, 205, 0.3) !important;
-    border-left-color: #0c90cd !important;
+    background-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    border-left-color: var(--color-accent);
   }
 
   /* --------------------------------------------
@@ -482,56 +421,25 @@
   .callout {
     padding: 1rem 1.25rem;
     margin: 1.5rem 0;
-    border-left: 4px solid #e85a0e; /* Orange accent matching stroke */
+    border-left: 4px solid var(--color-accent);
     background-color: #fff8f0; /* Warm light background */
     border-radius: 0 0.375rem 0.375rem 0;
   }
 
   .callout-title {
     font-weight: 700;
-    color: #c50300; /* Red accent */
+    color: var(--color-accent);
     margin-bottom: 0.5rem;
   }
 
   /* Dark mode callout */
   .dark .callout {
-    border-left-color: #0c90cd;
-    background-color: rgba(12, 144, 205, 0.1);
+    border-left-color: var(--color-accent);
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
   }
 
   .dark .callout-title {
-    color: #0c90cd;
-  }
-
-  /* --------------------------------------------
-                 Collapsible Drill Answers
-                 -------------------------------------------- */
-  details.drill {
-    margin: 1rem 0;
-    border: 1px solid var(--color-border);
-    border-radius: 0.375rem;
-  }
-
-  details.drill summary {
-    padding: 0.75rem 1rem;
-    cursor: pointer;
-    font-weight: 600;
-    background-color: var(--color-bg-secondary);
-    border-radius: 0.375rem;
-    transition: background-color var(--transition-fast);
-  }
-
-  details.drill summary:hover {
-    background-color: var(--color-bg-tertiary);
-  }
-
-  details.drill[open] summary {
-    border-radius: 0.375rem 0.375rem 0 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  details.drill > div {
-    padding: 1rem;
+    color: var(--color-accent);
   }
 
   /* --------------------------------------------
@@ -673,14 +581,14 @@
 
   .search-input:focus {
     outline: none;
-    border-color: #e85a0e; /* Orange accent */
-    box-shadow: 0 0 0 3px rgba(232, 90, 14, 0.15);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
   }
 
   /* Dark mode: Cyan focus ring */
   .dark .search-input:focus {
-    border-color: #0c90cd;
-    box-shadow: 0 0 0 3px rgba(12, 144, 205, 0.2);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 20%, transparent);
   }
 
   /* ==========================================================================
@@ -885,16 +793,6 @@
     font-family: var(--font-display);
   }
 
-  .font-body {
-    font-family: var(--font-body);
-  }
-
-  .text-hero {
-    font-family: var(--font-display);
-    font-size: var(--text-hero);
-    font-weight: 400; /* Regular weight for Chilanga */
-  }
-
   .text-primary {
     color: var(--color-text-primary);
   }
@@ -925,42 +823,6 @@
 
   .bg-border {
     background-color: var(--color-border);
-  }
-
-  /* Rótulo Background - Light mode floral white */
-  .bg-rotulo {
-    background: #fffaf0;
-  }
-
-  .dark .bg-rotulo {
-    background: #292524; /* Dark stone gray for dark mode */
-  }
-
-  /* Rótulo Text Style - Red→Coral with orange stroke, golden shadow (light mode) */
-  .style-rotulo {
-    background-image: linear-gradient(0deg, #c50300, #fc8568);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    -webkit-text-stroke: 0.025rem #e85a0e;
-    filter: drop-shadow(-0.11rem 0.11rem 0 #ffd500);
-  }
-
-  /* Rótulo Text Style - Dark mode: Red→Yellow with cream stroke, cyan shadow */
-  .dark .style-rotulo {
-    background-image: linear-gradient(0deg, #ff1101, #ffea07);
-    -webkit-text-stroke: 0.03rem #f7efd1;
-    filter: drop-shadow(-0.1rem 0.1rem 0 #0c90cd);
-  }
-
-  /* Golden/Yellow accent text */
-  .style-rotulo-gold {
-    background-image: linear-gradient(0deg, #d4a700, #ffd500);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    -webkit-text-stroke: 0.025rem #b8860b;
-    filter: drop-shadow(-0.1rem 0.1rem 0 #c50300);
   }
 
   .body-scroll-lock {

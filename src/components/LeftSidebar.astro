@@ -301,27 +301,4 @@ const lessonsBySection = allLessons
   :global(.dark) .bg-border {
     background-color: var(--color-text-tertiary) !important;
   }
-  /* Focus states for static links */
-  /* :focus works with :global(), JS-added data-focused also needs :global() */
-  :global(.nav-item):focus {
-    background-color: rgba(220, 38, 38, 0.15) !important;
-    box-shadow: inset 0 0 0 2px #dc2626 !important;
-    color: var(--color-text-primary) !important;
-  }
-  /* JS-added attribute - use :global() for entire selector */
-  :global(.nav-item[data-focused='true']) {
-    background-color: rgba(220, 38, 38, 0.15) !important;
-    box-shadow: inset 0 0 0 2px #dc2626 !important;
-    color: var(--color-text-primary) !important;
-  }
-
-  :global(.dark .nav-item):focus {
-    background-color: rgba(248, 113, 113, 0.2) !important;
-    box-shadow: inset 0 0 0 2px #f87171 !important;
-  }
-
-  :global(.dark .nav-item[data-focused='true']) {
-    background-color: rgba(248, 113, 113, 0.2) !important;
-    box-shadow: inset 0 0 0 2px #f87171 !important;
-  }
 </style>

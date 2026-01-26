@@ -176,35 +176,6 @@ const { siteTitle = 'A Course in Mexican Spanish' } = Astro.props;
     text-decoration: none;
   }
 
-  /* Logo text - Rótulo styling */
-  .logo-text,
-  .logo-text-short {
-    font-family: var(--font-display);
-    /* Light mode - Red→Coral gradient with orange stroke and golden shadow */
-    background-image: linear-gradient(0deg, #c50300, #fc8568);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    -webkit-text-stroke: 0.025rem #e85a0e;
-    filter: drop-shadow(-0.11rem 0.11rem 0 #ffd500);
-  }
-
-  .logo-text {
-    font-size: 3rem;
-  }
-
-  .logo-text-short {
-    font-size: 1.125rem;
-  }
-
-  /* Dark mode - Red→Yellow gradient with cream stroke and cyan shadow */
-  :global(.dark) .logo-text,
-  :global(.dark) .logo-text-short {
-    background-image: linear-gradient(0deg, #ff1101, #ffea07);
-    -webkit-text-stroke: 0.03rem #f7efd1;
-    filter: drop-shadow(-0.1rem 0.1rem 0 #0c90cd);
-  }
-
   .sidebar-icon-closed {
     display: none;
   }
@@ -251,17 +222,6 @@ const { siteTitle = 'A Course in Mexican Spanish' } = Astro.props;
   @media (min-width: 1024px) {
     .mobile-tablet-only {
       display: none;
-    }
-  }
-
-  /* Desktop only: >= 1024px */
-  .desktop-only {
-    display: none;
-  }
-
-  @media (min-width: 1024px) {
-    .desktop-only {
-      display: flex;
     }
   }
 </style>
