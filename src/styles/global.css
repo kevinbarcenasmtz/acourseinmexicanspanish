@@ -190,7 +190,6 @@
 /* ==========================================================================
                Base Layer
                ========================================================================== */
-
 @layer base {
   html {
     font-family: var(--font-body);
@@ -211,51 +210,31 @@
   }
 
   h1,
-  h2 {
-    font-family: var(--font-display);
-    font-weight: 400; /* Regular weight for Chilanga */
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-body);
+    color: var(--color-text-primary);
   }
 
   h1 {
     font-size: var(--text-h1);
-  }
-
-  /* Light mode - Red→Coral gradient with orange stroke and golden shadow */
-  h1,
-  h2 {
-    background-image: linear-gradient(0deg, #c50300, #fc8568);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    -webkit-text-stroke: 0.025rem #e85a0e;
-    filter: drop-shadow(-0.11rem 0.11rem 0 #ffd500);
-  }
-
-  /* Dark mode - Red→Yellow gradient with cream stroke and cyan shadow */
-  .dark h1,
-  .dark h2 {
-    background-image: linear-gradient(0deg, #ff1101, #ffea07);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    -webkit-text-stroke: 0.03rem #f7efd1;
-    filter: drop-shadow(-0.1rem 0.1rem 0 #0c90cd);
+    font-weight: 700;
   }
 
   h2 {
     font-size: var(--text-h2);
+    font-weight: 700;
   }
 
   h3 {
-    font-family: var(--font-body);
     font-size: var(--text-h3);
-    font-weight: 700; /* Bold for Atkinson */
+    font-weight: 700;
   }
 
   h4 {
-    font-family: var(--font-body);
     font-size: var(--text-h4);
-    font-weight: 700; /* Bold for Atkinson */
+    font-weight: 700;
   }
 
   a {

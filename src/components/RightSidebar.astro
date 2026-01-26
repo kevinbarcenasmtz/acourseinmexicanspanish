@@ -108,6 +108,7 @@ const hasHeadings = filteredHeadings.length > 0;
 
     function setActiveHeading(id: string | null) {
       if (id === activeHeadingId) return;
+
       activeHeadingId = id;
 
       tocLinks.forEach((link) => {
@@ -152,10 +153,24 @@ const hasHeadings = filteredHeadings.length > 0;
       });
 
       if (visibleHeadings.size > 0) {
-        const sortedVisible = Array.from(visibleHeadings.entries()).sort(
-          ([, a], [, b]) => a.boundingClientRect.top - b.boundingClientRect.top
-        );
-        setActiveHeading(sortedVisible[0][0]);
+        // Get current positions of all visible headings (not cached boundingClientRect from entries)
+        const headingsWithCurrentPositions = Array.from(visibleHeadings.keys())
+          .map((id) => {
+            const element = document.getElementById(id);
+            if (!element) return null;
+            return {
+              id,
+              top: element.getBoundingClientRect().top,
+            };
+          })
+          .filter((item): item is { id: string; top: number } => item !== null);
+
+        // Sort by current top position and pick the one closest to top of viewport
+        headingsWithCurrentPositions.sort((a, b) => a.top - b.top);
+
+        if (headingsWithCurrentPositions.length > 0) {
+          setActiveHeading(headingsWithCurrentPositions[0].id);
+        }
       } else {
         // No headings in intersection viewport - determine which should be active
         const scrollTop = window.scrollY;
@@ -163,8 +178,8 @@ const hasHeadings = filteredHeadings.length > 0;
         const clientHeight = document.documentElement.clientHeight;
         const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
 
-        // If within 100px of bottom, activate last heading
-        if (distanceFromBottom < 100 && headingElements.length > 0) {
+        // If within 100px of bottom AND actually scrolled down, activate last heading
+        if (distanceFromBottom < 100 && scrollTop > 100 && headingElements.length > 0) {
           const lastHeading = headingElements[headingElements.length - 1];
           setActiveHeading(lastHeading.id);
           return;

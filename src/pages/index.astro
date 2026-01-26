@@ -10,7 +10,7 @@ import RightSidebar from '../components/RightSidebar.astro';
 
 // Define headings for the ToC (must match IDs in content)
 const headings = [
-  { depth: 1, slug: 'welcome', text: 'A Course in Mexican Spanish' },
+  { depth: 1, slug: 'welcome', text: 'Welcome' },
   { depth: 2, slug: 'getting-started', text: 'Getting Started' },
   { depth: 2, slug: 'features', text: 'Features' },
   { depth: 2, slug: 'how-to-navigate', text: 'How to Navigate' },
@@ -30,20 +30,21 @@ const headings = [
 
   <!-- Main Content -->
   <article class="prose">
-    <h1 id="welcome">A Course in Mexican Spanish</h1>
+    <h2 id="welcome">Welcome</h2>
     <p>
-      <u>A Course in Mexican Spanish</u> was first created in 2025 but ongoing lessons are being added throughout the time.
-      The aim of this resource is to be a comprehensive Mexican Spanish learning resource designed specifically
-      for English speakers who already have introductory knowledge of Spanish through conversations
-      and exploratory use.
+      <u>A Course in Mexican Spanish</u> was initally a project created for my significant other. As lessons are being developed I decided to
+      make the website public so anyone with the need or want to learn the Spanish language as spoken in Mexico can use it.
+      The aim of this resource is to be a comprehensive Mexican Spanish learning resource designed
+      for English speakers, it assumes a very basic exposure to Spanish. 
     </p>
     <p>
-      The course or at least the presentation of the content mirrors closely the structure and format of <u>A Course in Levantine Arabic</u> by Ernest McCarus, Hamdi Qalisheh, & Raji Rammuny
+      The course or at least the presentation of the content mirrors closely the structure and format of <u>A Course in Levantine Arabic</u> by Ernest McCarus, Hamdi Qalisheh, & Raji Rammuny.
+      It can be found here if you're interested <a>https://al3arabiya.org/a-course-in-levantine-arabic/</a>
     </p>
 
     <h2 id="getting-started">Getting Started</h2>
     <p>
-      If you're new to this resource, we recommend starting with the
+      If you're new to this resource, I recommend starting with the
       <a href="/front-matter/introduction">Introduction to Mexican Spanish</a> and the
       <a href="/front-matter/how-to-use">How to Use This Resource</a> guide.
     </p>
@@ -87,7 +88,7 @@ const headings = [
     <div class="callout">
       <div class="callout-title">Keyboard Navigation</div>
       <p>
-        Press <kbd>/</kbd> to focus the search bar, use <kbd>↑</kbd> and <kbd>↓</kbd>
+        Use <kbd>↑</kbd> and <kbd>↓</kbd>
         arrows to move through lessons, and <kbd>←</kbd> / <kbd>→</kbd> to collapse/expand sections.
       </p>
     </div>

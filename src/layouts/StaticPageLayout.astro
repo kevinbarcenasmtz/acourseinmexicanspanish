@@ -41,7 +41,7 @@ const tocHeadings: Heading[] =
   {
     displayToc && tocHeadings.length > 0 && (
       <Fragment slot="right-sidebar">
-        <RightSidebar headings={tocHeadings} />
+        <RightSidebar headings={tocHeadings} title="Contents" />
       </Fragment>
     )
   }
@@ -50,7 +50,7 @@ const tocHeadings: Heading[] =
   {
     displayToc && tocHeadings.length > 0 && (
       <Fragment slot="mobile-toc">
-        <RightSidebar headings={tocHeadings} title="On this page" />
+        <RightSidebar headings={tocHeadings} title="Contents" />
       </Fragment>
     )
   }

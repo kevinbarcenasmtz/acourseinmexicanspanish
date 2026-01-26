@@ -2,56 +2,152 @@
 /**
  * about.astro
  *
- * Example static page using StaticPageLayout with ToC
+ * The personal story behind this project - why it exists,
+ * who created it, and the inspiration behind it.
  */
 
 import StaticPageLayout from '../layouts/StaticPageLayout.astro';
 
-// Define headings that match your page content (for ToC)
 const headings = [
-  { depth: 2, slug: 'why-mexican-spanish', text: 'Why Mexican Spanish?' },
-  { depth: 2, slug: 'our-approach', text: 'Our Approach' },
-  { depth: 2, slug: 'how-this-started', text: 'How This Started' },
+  { depth: 2, slug: 'the-gift', text: 'The Gift' },
+  { depth: 2, slug: 'my-background', text: 'My Background' },
+  { depth: 2, slug: 'the-variety-taught', text: 'The Variety Taught' },
+  { depth: 2, slug: 'inspiration', text: 'Inspiration' },
+  { depth: 2, slug: 'feedback-welcome', text: 'Feedback Welcome' },
   { depth: 2, slug: 'acknowledgments', text: 'Acknowledgments' },
 ];
 ---
 
 <StaticPageLayout
   title="About This Project"
-  description="Learn about the Mexican Spanish learning resource and its pedagogical approach."
+  description="The personal story behind A Course in Mexican Spanish | why it exists, who created it, and the inspiration that shaped it."
   headings={headings}
 >
-  <h2 id="why-mexican-spanish">Why Mexican Spanish?</h2>
+  <h2 id="the-gift">The Gift</h2>
   <p>
-    Mexican Spanish is the most widely spoken variety of Spanish in the world, with over 130 million
-    native speakers in Mexico alone. It features distinctive pronunciation patterns, vocabulary, and
-    expressions that set it apart from other Spanish varieties.
+    Realistically speaking, this project started as a gift to my significant other. We both grew up
+    acquiring different first languages and, as such, have been trying to teach each other our
+    native languages to better converse with each other's families. They've done a tremendous amount
+    of work helping me learn the Palestinian (Gaza) Arabic dialect, countless hours of patient
+    explanation, correction, and cultural context that no textbook could provide.
   </p>
 
-  <h2 id="our-approach">Our Approach</h2>
   <p>
-    Our pedagogical approach emphasizes practical, real-world communication. Each lesson is built
-    around authentic situations you might encounter when visiting Mexico or speaking with Mexican
-    Spanish speakers.
+    I wanted to create something in return. This course will never truly return the favor, nothing
+    can replace the gift of being taught your partner's language with such care, but it's my attempt
+    to do something meaningful. If it helps them (or anyone else) connect more deeply with Mexican
+    Spanish speakers and Mexican culture, then it's served its purpose.
+  </p>
+
+  <h2 id="my-background">My Background</h2>
+  <p>
+    To be transparent about my qualifications and limitations. As an ESL student, Spanish was
+    my primary language until middle school, and it continues to be the language I use outside of
+    work and education. I never formally studied Spanish in the traditional sense, my knowledge comes
+    from growing up in a Spanish-speaking household and community, supplemented by AP Spanish
+    Language & Composition and AP Spanish Literature in high school.
+  </p>
+
+  <p>
+    However, one of my bachelor's degrees is in Linguistics, which has given me the tools to analyze
+    and describe the language I grew up speaking. This linguistic training informs the phonetic
+    transcriptions, grammatical explanations, and structural approach throughout this course. I feel
+    confident in my ability to teach Mexican Spanish as it's actually spoken, not just as it appears
+    in textbooks.
+  </p>
+
+  <p>
+    That said, <strong>I'm not infallible</strong>. I make mistakes. My intuitions about the
+    language might sometimes be idiosyncratic. My explanations might not always be as clear as they
+    could be. If you notice errors, unnatural phrasing, unclear explanations, or anything that seems
+    odd, <strong>please let me know</strong> at{' '}
+    <a href="mailto:kab5987@my.utexas.edu">kab5987@my.utexas.edu</a>. This is a living resource that
+    improves with feedback from learners and native speakers.
+  </p>
+
+  <h2 id="the-variety-taught">The Variety Taught</h2>
+  <p>
+    Both of my parents grew up in the states of Zacatecas and Guanajuato, in small towns and
+    villages, what we call <em>ranchos</em>. The Spanish I grew up with, the Spanish I consider
+    "Mexican Spanish," is the Spanish of the rancho. It's the language of rural central (north?) Mexico, with
+    its distinctive vocabulary, pronunciation, and cultural context.
+  </p>
+
+  <p>
+    This course reflects that variety. You won't find the polished, educated urban Mexican Spanish
+    of textbooks and language academies of let's say Monterrey. You'll find the Spanish spoken at family gatherings in
+    small towns, at markets in rural communities, in conversations that weave together traditional
+    expressions with modern life. This is the living language, the kind you need if you want
+    to connect with people from these communities.
+  </p>
+
+  <p>
+    Where urban Mexican Spanish or other varieties differ significantly, I'll provide notes. But the
+    foundation of this course is rancho Spanish, because that's the variety I know intimately and
+    can teach with confidence.
+  </p>
+
+  <h2 id="inspiration">Inspiration</h2>
+  <p>
+    This project was directly inspired by{' '}
+    <a href="https://al3arabiya.org/a-course-in-levantine-arabic/" target="_blank" rel="noopener">
+      <em>A Course in Levantine Arabic</em>
+    </a>{' '}
+    by Ernest McCarus, Hamdi Qalisheh, and Raji Rammuny. That course demonstrated something powerful:
+    you can teach a non-standard, dialectal variety of a language with the same rigor and systematic approach
+    typically reserved for "standard" varieties.
+  </p>
+
+  <p>
+    Just as Levantine Arabic differs from Modern Standard Arabic, Mexican rancho Spanish differs
+    from the formal, standardized Spanish of textbooks. Just as learners benefit from authentic
+    Levantine materials, learners of Mexican Spanish benefit from authentic rancho materials. The
+    pedagogical structure of this course: dialogues, vocabulary cards, pronunciation notes, grammar
+    explanations, cultural context, progressive drills mirrors the Levantine Arabic model because it
+    works.
+  </p>
+
+  <h2 id="feedback-welcome">Feedback Welcome</h2>
+  <p>
+    This course is a work in progress. As I develop new lessons, I'm constantly refining the
+    approach, improving explanations, and incorporating feedback. If you're using this resource and
+    have thoughts <i>positive or critical</i> I want to hear them.
   </p>
 
   <div class="callout">
-    <div class="callout-title">Linguistic Features</div>
+    <div class="callout-title">How to Reach Me</div>
     <p>
-      We include IPA (International Phonetic Alphabet) transcriptions throughout to help you achieve
-      accurate pronunciation.
+      Email me at <a href="mailto:kab5987@my.utexas.edu">kab5987@my.utexas.edu</a> if you:
     </p>
+    <ul>
+      <li>Notice errors or unnatural phrasing</li>
+      <li>Find explanations unclear or confusing</li>
+      <li>Have suggestions for improvement</li>
+      <li>Want to share how you're using the course</li>
+      <li>Have questions about Mexican Spanish or linguistics</li>
+      <li>See errors in phonetic transcriptions!!!</li>
+    </ul>
   </div>
-
-  <h2 id="how-this-started">How This Started</h2>
-  <p>
-    This project was inspired by a Palestinian Arabic learning resource that demonstrated how
-    effective a well-structured, culturally-rich approach to language learning can be.
-  </p>
 
   <h2 id="acknowledgments">Acknowledgments</h2>
   <p>
-    We're grateful to the many native speakers, linguists, and educators who contributed their
-    expertise to this project.
+    First and foremost, thank you to my significant other for teaching me Arabic with such patience
+    and care, and for inspiring this project. Thank you to my parents for raising me in a
+    Spanish-speaking home and passing on the language and culture of Zacatecas and Guanajuato.
+  </p>
+
+  <p>
+    Thank you to the creators of <em>A Course in Levantine Arabic</em> for demonstrating what effective
+    dialectal language teaching looks like. Your pedagogical approach has been invaluable.
+  </p>
+
+  <p>
+    Thank you to everyone who has provided feedback, corrections, and suggestions as this course
+    develops. Your contributions make this resource better for everyone.
+  </p>
+
+  <p>
+    And thank you to you, the learner, for trusting this course to help you learn Mexican Spanish. I
+    hope it serves you well.
   </p>
 </StaticPageLayout>
